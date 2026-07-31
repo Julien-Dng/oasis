@@ -284,6 +284,14 @@ body{
 .mobile-menu .close{position:absolute;top:24px;right:24px;width:44px;height:44px}
 .mobile-menu .btn{margin-top:24px;font-size:1.1rem;justify-content:center}
 
+/* ============ BRAND LOGO ============ */
+.brand{gap:0}
+.brand-logo{height:30px;width:auto;display:block;color:var(--fg);transition:color .3s var(--ease)}
+.brand:hover .brand-logo{color:var(--water-bright)}
+.footer .brand-logo{height:27px}
+.mobile-menu .brand-logo{height:34px}
+@media (max-width:560px){.brand-logo{height:26px}}
+
 /* ============ NAV DROPDOWN ============ */
 .nav-item{position:relative;display:flex;align-items:center}
 .drop-trigger{display:inline-flex;align-items:center;gap:5px}
