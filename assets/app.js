@@ -57,15 +57,30 @@ document.querySelectorAll('.faq-q').forEach(function(q){
     });
   });});
 })();
-/* ---- Contact form (front-end demo) ---- */
+/* ---- Contact form (AJAX -> contact.php, no reload) ---- */
 (function(){
   var form=document.getElementById('contactForm');if(!form)return;
+  var err=document.getElementById('formError');
+  function showOk(){
+    form.style.display='none';
+    var ok=document.getElementById('formSuccess');ok.classList.add('show');
+    ok.scrollIntoView({block:'center',behavior:'smooth'});
+  }
   form.addEventListener('submit',function(e){
     e.preventDefault();
     if(!form.checkValidity()){form.reportValidity();return;}
-    form.style.display='none';
-    var ok=document.getElementById('formSuccess');
-    ok.classList.add('show');
-    ok.scrollIntoView({block:'center',behavior:'smooth'});
+    if(form.hasAttribute('data-demo')){showOk();return;} /* aperçu sans backend */
+    var btn=form.querySelector('button[type=submit]'),label=btn.innerHTML;
+    if(err)err.classList.remove('show');
+    btn.disabled=true;btn.textContent='Envoi en cours…';
+    fetch(form.getAttribute('action')||'contact.php',{
+      method:'POST',headers:{'X-Requested-With':'fetch'},body:new FormData(form)
+    }).then(function(r){return r.json();}).then(function(d){
+      if(d&&d.ok){showOk();}
+      else{throw new Error((d&&d.error)||'');}
+    }).catch(function(ex){
+      btn.disabled=false;btn.innerHTML=label;
+      if(err){err.textContent=(ex&&ex.message)?ex.message+' Vous pouvez aussi nous écrire à contact@oasiswebagency.com.':"Une erreur est survenue. Écrivez-nous directement à contact@oasiswebagency.com.";err.classList.add('show');}
+    });
   });
 })();
