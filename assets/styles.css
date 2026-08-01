@@ -227,17 +227,16 @@ body{
 .w5{background:linear-gradient(150deg,#15803d,#14532d 55%,#0b0a08)}
 .w6{background:linear-gradient(150deg,#9f1239,#4c0519 55%,#0b0a08)}
 .w7{background:linear-gradient(150deg,#7c3aed,#4c1d95 55%,#0b0a08)}
-/* ATLHES (w6) : pas d'image fournie -> conserve le dégradé */
-.w6::after{background:linear-gradient(150deg,#9f1239,#4c0519 55%,#0b0a08)}
 /* Réalisations avec photo : image réelle + voile sombre haut/bas pour garder
    le texte blanc lisible. Ken burns au survol conservé. */
-.w1::after,.w2::after,.w3::after,.w4::after,.w5::after,.w7::after{
+.w1::after,.w2::after,.w3::after,.w4::after,.w5::after,.w6::after,.w7::after{
   opacity:1;background-size:cover;background-position:center;background-repeat:no-repeat}
 .w1::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/smile-and-pay.webp")}
 .w2::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/vallourec.webp")}
 .w3::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/acupuncture-sanbao.png")}
 .w4::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/noublie-jamais.png")}
-.w5::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/maison-san-tea.jpg")}
+.w5::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/maison-san-tea.webp")}
+.w6::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/athles.png")}
 .w7::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/safetalk.jpg")}
 
 /* ============ CTA ============ */

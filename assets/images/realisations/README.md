@@ -9,10 +9,9 @@ Déposer ici les visuels des projets, avec **exactement** ces noms de fichiers
 | Vallourec          | w2    | `vallourec.webp`            |
 | Acupuncture Sanbao | w3    | `acupuncture-sanbao.png`    |
 | N'oublie jamais    | w4    | `noublie-jamais.png`        |
-| Maison San Tea     | w5    | `maison-san-tea.jpg`        |
+| Maison San Tea     | w5    | `maison-san-tea.webp`       |
+| ATLHES             | w6    | `athles.png`                |
 | SafeTalk           | w7    | `safetalk.jpg`              |
-
-ATLHES (w6) conserve son dégradé : aucune image n'est attendue.
 
 Tant qu'un fichier est absent, la carte correspondante affiche automatiquement
 son dégradé de repli — rien ne casse.
