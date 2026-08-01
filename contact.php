@@ -37,7 +37,7 @@ function respond($ok, $error = '') {
        . '.c{max-width:440px}h1{font-size:1.8rem;margin:0 0 12px}p{color:#A79E8C;line-height:1.6}'
        . 'a{display:inline-block;margin-top:24px;background:#2DD4BF;color:#05201C;text-decoration:none;'
        . 'font-weight:600;padding:13px 24px;border-radius:11px}</style></head><body><div class="c">'
-       . '<h1>' . $title . '</h1><p>' . $msg . '</p><a href="index.html">Retour à l\'accueil</a></div></body></html>';
+       . '<h1>' . $title . '</h1><p>' . $msg . '</p><a href="/">Retour à l\'accueil</a></div></body></html>';
     exit;
 }
 
