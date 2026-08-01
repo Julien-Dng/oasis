@@ -224,6 +224,7 @@ body{
 .w4::after{background:linear-gradient(150deg,#0e7490,#164e63 55%,#0b0a08)}
 .w5::after{background:linear-gradient(150deg,#15803d,#14532d 55%,#0b0a08)}
 .w6::after{background:linear-gradient(150deg,#9f1239,#4c0519 55%,#0b0a08)}
+.w7::after{background:linear-gradient(150deg,#7c3aed,#4c1d95 55%,#0b0a08)}
 
 /* ============ CTA ============ */
 .cta-band{position:relative;border-radius:var(--r-lg);overflow:hidden;padding:clamp(48px,8vw,90px);text-align:center;
