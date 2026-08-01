@@ -218,13 +218,27 @@ body{
   background:rgba(255,255,255,.14);backdrop-filter:blur(6px);display:grid;place-items:center;color:#fff;
   opacity:0;transform:translateY(-6px);transition:.4s var(--ease)}
 .work:hover .arrow{opacity:1;transform:none}
-.w1::after{background:linear-gradient(150deg,#0f766e,#134e4a 55%,#0b0a08)}
-.w2::after{background:linear-gradient(150deg,#b45309,#7c2d12 55%,#0b0a08)}
-.w3::after{background:linear-gradient(150deg,#4338ca,#1e1b4b 55%,#0b0a08)}
-.w4::after{background:linear-gradient(150deg,#0e7490,#164e63 55%,#0b0a08)}
-.w5::after{background:linear-gradient(150deg,#15803d,#14532d 55%,#0b0a08)}
+/* Fond de repli (dégradé) porté par la carte : reste visible si l'image
+   n'est pas encore présente. */
+.w1{background:linear-gradient(150deg,#0f766e,#134e4a 55%,#0b0a08)}
+.w2{background:linear-gradient(150deg,#b45309,#7c2d12 55%,#0b0a08)}
+.w3{background:linear-gradient(150deg,#4338ca,#1e1b4b 55%,#0b0a08)}
+.w4{background:linear-gradient(150deg,#0e7490,#164e63 55%,#0b0a08)}
+.w5{background:linear-gradient(150deg,#15803d,#14532d 55%,#0b0a08)}
+.w6{background:linear-gradient(150deg,#9f1239,#4c0519 55%,#0b0a08)}
+.w7{background:linear-gradient(150deg,#7c3aed,#4c1d95 55%,#0b0a08)}
+/* ATLHES (w6) : pas d'image fournie -> conserve le dégradé */
 .w6::after{background:linear-gradient(150deg,#9f1239,#4c0519 55%,#0b0a08)}
-.w7::after{background:linear-gradient(150deg,#7c3aed,#4c1d95 55%,#0b0a08)}
+/* Réalisations avec photo : image réelle + voile sombre haut/bas pour garder
+   le texte blanc lisible. Ken burns au survol conservé. */
+.w1::after,.w2::after,.w3::after,.w4::after,.w5::after,.w7::after{
+  opacity:1;background-size:cover;background-position:center;background-repeat:no-repeat}
+.w1::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/smile-and-pay.webp")}
+.w2::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/vallourec.webp")}
+.w3::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/acupuncture-sanbao.png")}
+.w4::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/noublie-jamais.png")}
+.w5::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/maison-san-tea.jpg")}
+.w7::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/safetalk.jpg")}
 
 /* ============ CTA ============ */
 .cta-band{position:relative;border-radius:var(--r-lg);overflow:hidden;padding:clamp(48px,8vw,90px);text-align:center;
