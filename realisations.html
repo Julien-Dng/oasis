@@ -12,6 +12,18 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/styles.css">
 <script>document.documentElement.classList.add('js');</script>
+<style>
+/* GSAP: masque l'en-tête de page avant son entrée + neutralise la transition des reveals */
+.gsap .page-hero .breadcrumb,.gsap .page-hero .eyebrow,.gsap .page-hero h1,.gsap .page-hero .lead,.gsap .page-hero .hero-cta{opacity:0}
+.gsap .reveal{transition:none}
+</style>
+<script>
+(function(){var r=document.documentElement;
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  r.classList.add('gsap');
+  window.__gsapFail=setTimeout(function(){r.classList.remove('gsap');},2500);
+}})();
+</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="oasisGrad" gradientUnits="userSpaceOnUse" x1="150" y1="390" x2="840" y2="610"><stop class="lg0"/><stop offset="1" class="lg1"/></linearGradient></defs></svg>
@@ -183,5 +195,8 @@
   </div>
 </footer>
 <script src="assets/app.js"></script>
+<script src="assets/gsap.min.js"></script>
+<script src="assets/ScrollTrigger.min.js"></script>
+<script src="assets/site-gsap.js"></script>
 </body>
 </html>
