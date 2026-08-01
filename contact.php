@@ -28,7 +28,7 @@ function respond($ok, $error = '') {
     header('Content-Type: text/html; charset=utf-8');
     $title = $ok ? 'Message envoyé' : 'Erreur';
     $msg   = $ok
-        ? "Merci pour votre message. Nous revenons vers vous sous 24h."
+        ? "Merci pour votre message. Nous revenons vers vous sous 48h."
         : ("Votre message n'a pas pu être envoyé. " . htmlspecialchars($error, ENT_QUOTES, 'UTF-8') . " Vous pouvez nous écrire directement à contact@oasiswebagency.com.");
     echo '<!doctype html><html lang="fr"><head><meta charset="utf-8">'
        . '<meta name="viewport" content="width=device-width,initial-scale=1"><title>' . $title . ' — Oasis</title>'
