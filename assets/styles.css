@@ -296,6 +296,12 @@ body{
 .lg0{stop-color:var(--water-bright)}
 .lg1{stop-color:var(--sun)}
 
+/* ============ SERVICE CARD "En savoir plus" ============ */
+.card-more{margin-top:18px;display:inline-flex;align-items:center;gap:7px;position:relative;z-index:1;
+  font-family:var(--font-mono);font-size:.72rem;letter-spacing:.06em;color:var(--water-bright)}
+.card-more svg{width:15px;height:15px;flex:none;transition:transform .3s var(--ease)}
+.card:hover .card-more svg{transform:translateX(4px)}
+
 /* ============ NAV DROPDOWN ============ */
 .nav-item{position:relative;display:flex;align-items:center}
 .drop-trigger{display:inline-flex;align-items:center;gap:5px}
