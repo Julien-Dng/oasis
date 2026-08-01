@@ -1,7 +1,9 @@
 /* =====================================================================
-   Oasis Web Agency — timeline scrollée du hero de la page d’accueil.
-   Le DOM/CSS reste une oasis statique si GSAP est absent ou si l’utilisateur
-   préfère réduire les animations.
+   Oasis Web Agency — transition photographique liée au scroll.
+
+   Un seul wrapper porte les deux images maîtresses afin de garder l’horizon
+   et la dune droite parfaitement stables. GSAP pilote uniquement le masque,
+   les transforms, les opacités et les voiles atmosphériques.
    ===================================================================== */
 (function () {
   'use strict';
@@ -17,45 +19,10 @@
 
   if (lowPower) root.classList.add('oasis-lite');
 
-  function randomFactory(seed) {
-    var state = seed >>> 0;
-    return function () {
-      state = (state * 1664525 + 1013904223) >>> 0;
-      return state / 4294967296;
-    };
-  }
-
-  function populate(containerId, count, seed, isStar) {
-    var container = document.getElementById(containerId);
-    if (!container) return;
-    var random = randomFactory(seed);
-    var fragment = document.createDocumentFragment();
-
-    for (var index = 0; index < count; index += 1) {
-      var particle = document.createElement('i');
-      var x = (random() * 100).toFixed(2) + '%';
-      var y = (random() * (isStar ? 58 : 72) + (isStar ? 1 : 12)).toFixed(2) + '%';
-      var size = (random() * (isStar ? 1.5 : 2.5) + (isStar ? .7 : 1.5)).toFixed(2) + 'px';
-      particle.style.left = x;
-      particle.style.top = y;
-      particle.style.setProperty('--size', size);
-      particle.style.setProperty('--duration', (random() * 5 + (isStar ? 3 : 6)).toFixed(2) + 's');
-      particle.style.setProperty('--delay', (-random() * 7).toFixed(2) + 's');
-      particle.style.setProperty('--drift', (random() * 32 - 16).toFixed(1) + 'px');
-      fragment.appendChild(particle);
-    }
-    container.appendChild(fragment);
-  }
-
-  var mobile = window.matchMedia('(max-width:760px)').matches;
-  var particleFactor = lowPower ? .55 : 1;
-  populate('oasisStars', Math.round((mobile ? 30 : 56) * particleFactor), 4871, true);
-  populate('oasisParticlesDark', Math.round((mobile ? 7 : 14) * particleFactor), 7319, false);
-  populate('oasisParticlesLight', Math.round((mobile ? 8 : 18) * particleFactor), 9151, false);
-
-  function staticHeaderObserver() {
+  function observeStaticHeader() {
     document.body.classList.add('oasis-active');
     if (!('IntersectionObserver' in window)) return;
+
     var observer = new IntersectionObserver(function (entries) {
       document.body.classList.toggle('oasis-active', entries[0].isIntersecting);
     }, { threshold: .05 });
@@ -64,7 +31,8 @@
 
   if (reduceMotion || !window.gsap || !window.ScrollTrigger) {
     root.classList.add('oasis-static');
-    staticHeaderObserver();
+    clearTimeout(window.__gsapFail);
+    observeStaticHeader();
     return;
   }
 
@@ -73,8 +41,20 @@
   root.classList.add('oasis-motion-ready');
 
   var select = gsap.utils.selector(journey);
+  var mediaLayer = select('.oasis-media')[0];
+  var desertFrame = select('.oasis-frame-desert')[0];
+  var oasisFrame = select('.oasis-frame-oasis')[0];
+  var atmosphere = select('.oasis-atmosphere-group')[0];
+  var horizonLight = select('.oasis-horizon-light')[0];
+  var mist = select('.oasis-mist')[0];
+  var colorWash = select('.oasis-color-wash')[0];
+  var particles = select('.oasis-particles')[0];
+  var vignette = select('.oasis-vignette')[0];
+  var intro = select('.oasis-intro')[0];
+  var finalCopy = select('.oasis-reveal')[0];
+  var bridge = select('.oasis-service-bridge')[0];
   var progressSteps = select('.oasis-progress span');
-  var media = gsap.matchMedia();
+  var matchMedia = gsap.matchMedia();
 
   function setProgress(activeIndex) {
     progressSteps.forEach(function (step, index) {
@@ -82,34 +62,66 @@
     });
   }
 
-  media.add({
+  function seededRandom(seed) {
+    var state = seed >>> 0;
+    return function () {
+      state = (state * 1664525 + 1013904223) >>> 0;
+      return state / 4294967296;
+    };
+  }
+
+  function populateParticles() {
+    if (!particles || lowPower || coarsePointer || window.innerWidth <= 760) return;
+
+    var random = seededRandom(7283);
+    var fragment = document.createDocumentFragment();
+    for (var index = 0; index < 10; index += 1) {
+      var particle = document.createElement('i');
+      particle.style.setProperty('--x', (24 + random() * 52).toFixed(2) + '%');
+      particle.style.setProperty('--y', (43 + random() * 30).toFixed(2) + '%');
+      particle.style.setProperty('--size', (.7 + random() * 1.25).toFixed(2) + 'px');
+      particle.style.setProperty('--duration', (6 + random() * 5).toFixed(2) + 's');
+      particle.style.setProperty('--delay', (-random() * 8).toFixed(2) + 's');
+      particle.style.setProperty('--drift', (-7 + random() * 14).toFixed(1) + 'px');
+      fragment.appendChild(particle);
+    }
+    particles.appendChild(fragment);
+  }
+
+  populateParticles();
+
+  matchMedia.add({
     isDesktop: '(min-width:761px)',
     isMobile: '(max-width:760px)'
   }, function (context) {
     var isDesktop = context.conditions.isDesktop;
-    var depth = isDesktop ? 1 : .56;
-    var scrollScreens = isDesktop ? 3.6 : 2.7;
+    var depth = isDesktop ? 1 : .62;
+    var scrollScreens = isDesktop ? 3 : 2.3;
+    var finalMaskX = isDesktop ? '170%' : '160%';
+    var finalMaskY = isDesktop ? '150%' : '145%';
     var pointerHandler;
 
-    gsap.set(select('.oasis-sky-night'), { autoAlpha: 1 });
-    gsap.set(select('.oasis-sky-dawn, .oasis-sky-day'), { autoAlpha: 0 });
-    gsap.set(select('.oasis-stars'), { autoAlpha: 1 });
-    gsap.set(select('.oasis-horizon-glow'), { autoAlpha: .2, scale: .42, xPercent: -50, yPercent: -34 });
-    gsap.set(select('.oasis-orb'), { autoAlpha: .68, scale: .34, xPercent: -50, yPercent: -20 });
-    gsap.set(select('.oasis-orb-warm'), { autoAlpha: 0 });
-    gsap.set(select('.oasis-world'), { scale: 1, transformOrigin: '50% 64%' });
-    gsap.set(select('.oasis-dunes-far'), { yPercent: 4 * depth });
-    gsap.set(select('.oasis-dunes-mid'), { yPercent: 7 * depth });
-    gsap.set(select('.oasis-dunes-near'), { yPercent: 10 * depth });
-    gsap.set(select('.oasis-dune-light'), { autoAlpha: 0 });
-    gsap.set(select('.oasis-water'), { autoAlpha: 0, scaleY: .08, yPercent: 4 });
-    gsap.set(select('.oasis-plant, .oasis-reeds'), { autoAlpha: 0, scaleY: .2, y: 32 * depth });
-    gsap.set(select('.oasis-particles-dark'), { autoAlpha: .48 });
-    gsap.set(select('.oasis-particles-light'), { autoAlpha: 0 });
-    gsap.set(select('.oasis-atmosphere'), { autoAlpha: .08 });
-    gsap.set(select('.oasis-service-bridge'), { autoAlpha: 0, yPercent: 28 });
-    gsap.set(select('.oasis-intro'), { autoAlpha: 1, y: 0 });
-    gsap.set(select('.oasis-reveal'), { autoAlpha: 0, y: 32 });
+    gsap.set(mediaLayer, {
+      autoAlpha: 1,
+      scale: 1,
+      yPercent: 0,
+      transformOrigin: '50% 56%'
+    });
+    gsap.set(desertFrame, { autoAlpha: 1 });
+    gsap.set(oasisFrame, {
+      autoAlpha: 0,
+      '--oasis-mask-x': '3%',
+      '--oasis-mask-y': '3%'
+    });
+    gsap.set(atmosphere, { autoAlpha: 1, x: 0, y: 0 });
+    gsap.set(horizonLight, { autoAlpha: .06, scale: .74, xPercent: -50, yPercent: -50 });
+    gsap.set(mist, { autoAlpha: 0, y: 12 * depth });
+    gsap.set(colorWash, { autoAlpha: 0 });
+    gsap.set(particles, { autoAlpha: 0, y: 8 * depth });
+    gsap.set(vignette, { autoAlpha: 1 });
+    gsap.set(intro, { autoAlpha: 1, y: 0 });
+    gsap.set(finalCopy, { autoAlpha: 0, y: 26 * depth });
+    gsap.set(bridge, { autoAlpha: 0, yPercent: 26 });
 
     var timeline = gsap.timeline({
       defaults: { ease: 'none' },
@@ -123,7 +135,7 @@
         pin: select('.oasis-scene')[0],
         pinSpacing: true,
         anticipatePin: 1,
-        scrub: isDesktop ? .75 : .45,
+        scrub: isDesktop ? .8 : .45,
         invalidateOnRefresh: true,
         refreshPriority: -10,
         onToggle: function (self) {
@@ -131,75 +143,139 @@
         },
         onUpdate: function (self) {
           var progress = self.progress;
-          setProgress(progress < .24 ? 0 : progress < .5 ? 1 : progress < .76 ? 2 : 3);
+          setProgress(progress < .2 ? 0 : progress < .45 ? 1 : progress < .75 ? 2 : 3);
         }
       }
     });
 
     timeline
       .addLabel('desert', 0)
-      .to(select('.oasis-scroll-hint'), { autoAlpha: 0, duration: .45 }, 'desert+=.12')
+      .to(select('.oasis-scroll-hint'), { autoAlpha: 0, duration: 1.05 }, .35)
+      .to(mediaLayer, {
+        scale: 1 + .012 * depth,
+        yPercent: -.22 * depth,
+        duration: 2,
+        ease: 'power1.inOut'
+      }, 'desert')
 
-      .addLabel('approach', .45)
-      .to(select('.oasis-intro'), { autoAlpha: 0, y: -42 * depth, duration: .9, ease: 'power2.in' }, 'approach+=.7')
-      .to(select('.oasis-orb'), { autoAlpha: 1, scale: .88, xPercent: -50, yPercent: -42, duration: 2.25, ease: 'power2.inOut' }, 'approach')
-      .to(select('.oasis-horizon-glow'), { autoAlpha: .78, scale: .94, xPercent: -50, yPercent: -48, duration: 2.2, ease: 'power2.out' }, 'approach')
-      .to(select('.oasis-sky-night'), { autoAlpha: .18, duration: 2 }, 'approach+=.25')
-      .to(select('.oasis-sky-dawn'), { autoAlpha: 1, duration: 2 }, 'approach+=.25')
-      .to(select('.oasis-stars'), { autoAlpha: .24, duration: 1.7 }, 'approach+=.35')
-      .to(select('.oasis-world'), { scale: 1 + .055 * depth, yPercent: -1.4 * depth, duration: 2.3, ease: 'power1.inOut' }, 'approach')
-      .to(select('.oasis-dunes-far'), { yPercent: -1.5 * depth, duration: 2.3 }, 'approach')
-      .to(select('.oasis-dunes-mid'), { yPercent: -3.5 * depth, duration: 2.3 }, 'approach')
-      .to(select('.oasis-dunes-near'), { yPercent: -6.5 * depth, duration: 2.3 }, 'approach')
-
-      .addLabel('transformation', 2.55)
-      .to(select('.oasis-sky-night'), { autoAlpha: 0, duration: 1.75 }, 'transformation')
-      .to(select('.oasis-sky-dawn'), { autoAlpha: .34, duration: 1.9 }, 'transformation')
-      .to(select('.oasis-sky-day'), { autoAlpha: 1, duration: 1.9 }, 'transformation')
-      .to(select('.oasis-stars'), { autoAlpha: 0, duration: 1.1 }, 'transformation')
-      .to(select('.oasis-dune-light'), { autoAlpha: 1, duration: 1.9, stagger: .12 }, 'transformation+=.15')
-      .to(select('.oasis-water'), { autoAlpha: 1, scaleY: 1, yPercent: 0, duration: 1.7, ease: 'power2.out' }, 'transformation+=.28')
-      .to(select('.oasis-particles-dark'), { autoAlpha: 0, y: -18, duration: 1.25 }, 'transformation+=.2')
-      .to(select('.oasis-particles-light'), { autoAlpha: .72, duration: 1.45 }, 'transformation+=.72')
-      .to(select('.oasis-atmosphere'), { autoAlpha: .54, duration: 1.7 }, 'transformation+=.35')
-      .to(select('.oasis-plant, .oasis-reeds'), {
-        autoAlpha: 1,
-        scaleY: 1,
+      .addLabel('approach', 2)
+      .to(horizonLight, {
+        autoAlpha: .7,
+        scale: 1,
+        xPercent: -50,
+        yPercent: -50,
+        duration: 2.5,
+        ease: 'power2.out'
+      }, 'approach')
+      .to(mist, {
+        autoAlpha: .34,
         y: 0,
-        duration: 1.35,
-        stagger: .13,
+        duration: 2.15,
+        ease: 'power2.out'
+      }, 'approach+=.35')
+      .to(colorWash, { autoAlpha: .13, duration: 2 }, 'approach+=.5')
+      .to(particles, { autoAlpha: .16, y: 0, duration: 1.45 }, 'approach+=1.1')
+      .to(intro, {
+        autoAlpha: 0,
+        y: -34 * depth,
+        duration: 1.3,
+        ease: 'power2.in'
+      }, 'approach+=1.05')
+      .to(mediaLayer, {
+        scale: 1 + .022 * depth,
+        yPercent: -.45 * depth,
+        duration: 2.5,
+        ease: 'power1.inOut'
+      }, 'approach')
+
+      .addLabel('transformation', 4.5)
+      .to(oasisFrame, {
+        autoAlpha: 1,
+        '--oasis-mask-x': isDesktop ? '92%' : '108%',
+        '--oasis-mask-y': isDesktop ? '82%' : '96%',
+        duration: 3,
+        ease: 'power1.inOut'
+      }, 'transformation')
+      .to(horizonLight, {
+        autoAlpha: .92,
+        scale: 1.08,
+        xPercent: -50,
+        yPercent: -50,
+        duration: 2.2,
+        ease: 'power1.out'
+      }, 'transformation')
+      .to(mist, { autoAlpha: .62, y: -4 * depth, duration: 2.35 }, 'transformation')
+      .to(colorWash, { autoAlpha: .32, duration: 2.5 }, 'transformation+=.15')
+      .to(particles, { autoAlpha: .45, y: -6 * depth, duration: 2 }, 'transformation+=.35')
+      .to(mediaLayer, {
+        scale: 1 + .036 * depth,
+        yPercent: -.9 * depth,
+        duration: 3,
+        ease: 'power1.inOut'
+      }, 'transformation')
+
+      .addLabel('oasis', 7.5)
+      .to(oasisFrame, {
+        '--oasis-mask-x': finalMaskX,
+        '--oasis-mask-y': finalMaskY,
+        duration: .55,
+        ease: 'power1.out'
+      }, 'oasis')
+      .to(horizonLight, {
+        autoAlpha: .58,
+        scale: 1.04,
+        xPercent: -50,
+        yPercent: -50,
+        duration: 1.25
+      }, 'oasis+=.15')
+      .to(mist, { autoAlpha: .43, duration: 1.15 }, 'oasis+=.15')
+      .to(finalCopy, {
+        autoAlpha: 1,
+        y: 0,
+        duration: .85,
         ease: 'power3.out'
-      }, 'transformation+=1.02')
-      .to(select('.oasis-orb-warm'), { autoAlpha: .76, duration: 1.5 }, 'transformation+=.8')
-      .to(select('.oasis-orb'), { scale: 1.08, xPercent: -50, yPercent: -50, duration: 1.8, ease: 'power2.out' }, 'transformation+=.4')
-      .to(select('.oasis-world'), { scale: 1 + .095 * depth, yPercent: -2.4 * depth, duration: 2.1 }, 'transformation')
+      }, 'oasis+=.22')
+      .to(mediaLayer, {
+        scale: 1 + .04 * depth,
+        yPercent: -1.05 * depth,
+        duration: 1.5,
+        ease: 'power1.inOut'
+      }, 'oasis')
 
-      .addLabel('reveal', 5.05)
-      .fromTo(select('.oasis-reveal'),
-        { autoAlpha: 0, y: 32 * depth },
-        { autoAlpha: 1, y: 0, duration: .8, ease: 'power3.out', immediateRender: false },
-        'reveal')
-      .to(select('.oasis-horizon-glow'), { autoAlpha: .92, scale: 1.08, duration: 1.25 }, 'reveal')
-
-      .addLabel('exit', 6.45)
-      .to(select('.oasis-reveal'), { autoAlpha: 0, y: -30 * depth, duration: .72, ease: 'power2.in' }, 'exit+=.42')
-      .to(select('.oasis-service-bridge'), { autoAlpha: 1, yPercent: 0, duration: 1.2, ease: 'power1.in' }, 'exit+=.15')
-      .to(select('.oasis-world'), { yPercent: -4 * depth, scale: 1 + .11 * depth, duration: 1.2 }, 'exit+=.15')
-      .to({}, { duration: .35 });
+      .addLabel('exit', 9)
+      .to(finalCopy, {
+        autoAlpha: 0,
+        y: -24 * depth,
+        duration: .65,
+        ease: 'power2.in'
+      }, 'exit+=.08')
+      .to(bridge, {
+        autoAlpha: 1,
+        yPercent: 0,
+        duration: 1,
+        ease: 'power1.in'
+      }, 'exit')
+      .to(atmosphere, { autoAlpha: 0, y: -8 * depth, duration: .85 }, 'exit+=.08')
+      .to(vignette, { autoAlpha: .48, duration: .8 }, 'exit+=.08')
+      .to(mediaLayer, {
+        autoAlpha: .38,
+        scale: 1 + .05 * depth,
+        yPercent: -1.8 * depth,
+        duration: 1,
+        ease: 'power1.in'
+      }, 'exit')
+      .to({}, { duration: .01 }, 9.99);
 
     document.body.classList.add('oasis-active');
 
     if (isDesktop && !lowPower && !coarsePointer) {
-      var farX = gsap.quickTo(select('.oasis-dunes-far')[0], 'xPercent', { duration: .7, ease: 'power3.out' });
-      var midX = gsap.quickTo(select('.oasis-dunes-mid')[0], 'xPercent', { duration: .7, ease: 'power3.out' });
-      var nearX = gsap.quickTo(select('.oasis-dunes-near')[0], 'xPercent', { duration: .7, ease: 'power3.out' });
-      var orbX = gsap.quickTo(select('.oasis-orb')[0], 'x', { duration: .9, ease: 'power3.out' });
+      var atmosphereX = gsap.quickTo(atmosphere, 'x', { duration: 1.15, ease: 'power3.out' });
+      var atmosphereY = gsap.quickTo(atmosphere, 'y', { duration: 1.15, ease: 'power3.out' });
       pointerHandler = function (event) {
-        var offset = event.clientX / window.innerWidth - .5;
-        farX(offset * 1.2);
-        midX(offset * 2.2);
-        nearX(offset * 3.5);
-        orbX(offset * -8);
+        var xOffset = event.clientX / window.innerWidth - .5;
+        var yOffset = event.clientY / window.innerHeight - .5;
+        atmosphereX(xOffset * 6);
+        atmosphereY(yOffset * 3);
       };
       journey.addEventListener('pointermove', pointerHandler, { passive: true });
     }
@@ -215,6 +291,9 @@
     ScrollTrigger.refresh();
   }
 
+  select('.oasis-frame img').forEach(function (image) {
+    if (!image.complete) image.addEventListener('load', refreshScene, { once: true });
+  });
   if (document.fonts && document.fonts.ready) {
     document.fonts.ready.then(refreshScene);
   }
