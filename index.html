@@ -12,6 +12,19 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/styles.css">
 <script>document.documentElement.classList.add('js');</script>
+<style>
+/* GSAP: masque le hero avant son entrée + neutralise la transition CSS des reveals (GSAP prend le relais) */
+.gsap .hero .hero-badge,.gsap .hero h1,.gsap .hero .hero-sub,.gsap .hero .hero-cta,.gsap .hero .marquee{opacity:0}
+.gsap .reveal{transition:none}
+</style>
+<script>
+/* Pose .gsap avant le paint (pas de flash) si le mouvement est autorisé. Failsafe si GSAP ne charge pas. */
+(function(){var r=document.documentElement;
+if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
+  r.classList.add('gsap');
+  window.__gsapFail=setTimeout(function(){r.classList.remove('gsap');},2500);
+}})();
+</script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="oasisGrad" gradientUnits="userSpaceOnUse" x1="150" y1="390" x2="840" y2="610"><stop class="lg0"/><stop offset="1" class="lg1"/></linearGradient></defs></svg>
@@ -233,5 +246,8 @@
   </div>
 </footer>
 <script src="assets/app.js"></script>
+<script src="assets/gsap.min.js"></script>
+<script src="assets/ScrollTrigger.min.js"></script>
+<script src="assets/home-gsap.js"></script>
 </body>
 </html>
