@@ -12,6 +12,8 @@
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/styles.css">
 <link rel="stylesheet" href="assets/oasis-cinematic.css">
+<link rel="preload" as="image" href="assets/images/oasis/optimized/master-a-desert-night.webp" type="image/webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/images/oasis/optimized/master-b-oasis-light.webp" type="image/webp">
 <script>document.documentElement.classList.add('js');</script>
 <style>
 /* GSAP : neutralise la transition CSS des reveals (GSAP prend le relais) */
@@ -105,95 +107,24 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
 <main id="main"><span id="top"></span>
 <section class="oasis-journey" id="cine" aria-labelledby="oasis-title">
   <div class="oasis-scene">
-    <div class="oasis-sky oasis-sky-night" aria-hidden="true"></div>
-    <div class="oasis-sky oasis-sky-dawn" aria-hidden="true"></div>
-    <div class="oasis-sky oasis-sky-day" aria-hidden="true"></div>
-
-    <div class="oasis-stars" id="oasisStars" aria-hidden="true"></div>
-    <div class="oasis-horizon-glow" aria-hidden="true"></div>
-    <div class="oasis-orb" aria-hidden="true">
-      <span class="oasis-orb-core"></span>
-      <span class="oasis-orb-warm"></span>
+    <div class="oasis-media" aria-hidden="true">
+      <picture class="oasis-frame oasis-frame-desert">
+        <source srcset="assets/images/oasis/optimized/master-a-desert-night.webp" type="image/webp">
+        <img src="assets/images/oasis/generated/master-a-desert-night.png" alt="" width="1376" height="768" decoding="async" fetchpriority="high">
+      </picture>
+      <picture class="oasis-frame oasis-frame-oasis">
+        <source srcset="assets/images/oasis/optimized/master-b-oasis-light.webp" type="image/webp">
+        <img src="assets/images/oasis/generated/master-b-oasis-light.png" alt="" width="1376" height="768" decoding="async">
+      </picture>
     </div>
 
-    <div class="oasis-world" aria-hidden="true">
-      <div class="oasis-dunes oasis-dunes-far">
-        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
-          <path class="oasis-dune-dark" d="M0 615C206 566 386 578 566 553c206-29 342-5 504 11 171 17 337-15 530-44v380H0Z"/>
-          <path class="oasis-dune-light" d="M0 615C206 566 386 578 566 553c206-29 342-5 504 11 171 17 337-15 530-44v380H0Z"/>
-        </svg>
-      </div>
-      <div class="oasis-dunes oasis-dunes-mid">
-        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
-          <path class="oasis-dune-dark" d="M0 690c180-16 311 6 455 54 121 40 220 58 345 49 124-9 250-46 360-76 164-45 289-48 440-23v206H0Z"/>
-          <path class="oasis-dune-light" d="M0 690c180-16 311 6 455 54 121 40 220 58 345 49 124-9 250-46 360-76 164-45 289-48 440-23v206H0Z"/>
-        </svg>
-      </div>
-
-      <div class="oasis-water">
-        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
-          <defs>
-            <linearGradient id="oasisWaterGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#b9fff4" stop-opacity=".84"/>
-              <stop offset=".32" stop-color="#38dbc5" stop-opacity=".78"/>
-              <stop offset="1" stop-color="#063d45" stop-opacity=".96"/>
-            </linearGradient>
-            <linearGradient id="oasisReflectionGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop stop-color="#8ff6e7" stop-opacity="0"/>
-              <stop offset=".5" stop-color="#fff2cc" stop-opacity=".82"/>
-              <stop offset="1" stop-color="#8ff6e7" stop-opacity="0"/>
-            </linearGradient>
-          </defs>
-          <path class="oasis-water-body" d="M680 665c45-8 81-11 120-11s75 3 120 11c116 21 218 87 330 235H350c112-148 214-214 330-235Z"/>
-          <path class="oasis-water-reflection" d="M786 664h28l82 236H704Z"/>
-          <g class="oasis-ripples">
-            <path d="M700 700c66 9 134 9 200 0"/>
-            <path d="M642 748c104 14 212 14 316 0"/>
-            <path d="M563 817c156 17 318 17 474 0"/>
-          </g>
-        </svg>
-      </div>
-
-      <div class="oasis-vegetation">
-        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
-          <g class="oasis-plant oasis-plant-left">
-            <path class="oasis-trunk" d="M438 846c13-121 29-229 54-324"/>
-            <path d="M493 521c-64-51-121-53-174-12 63-7 111 5 174 12Z"/>
-            <path d="M493 521c-35-75-78-107-136-104 58 23 95 53 136 104Z"/>
-            <path d="M493 521c1-77 22-126 62-157-18 55-32 100-62 157Z"/>
-            <path d="M493 521c65-54 124-58 180-19-65-4-116 5-180 19Z"/>
-            <path d="M493 521c50 5 94 32 130 79-53-24-93-48-130-79Z"/>
-          </g>
-          <g class="oasis-plant oasis-plant-right">
-            <path class="oasis-trunk" d="M1174 850c-9-132-22-245-45-348"/>
-            <path d="M1128 502c-63-55-121-60-176-23 64-2 114 11 176 23Z"/>
-            <path d="M1128 502c-21-77-57-119-111-128 52 34 81 70 111 128Z"/>
-            <path d="M1128 502c15-77 46-121 92-144-29 51-51 94-92 144Z"/>
-            <path d="M1128 502c68-43 126-38 176 5-63-10-112-10-176-5Z"/>
-            <path d="M1128 502c49 13 87 44 116 94-48-30-84-58-116-94Z"/>
-          </g>
-          <g class="oasis-reeds oasis-reeds-left">
-            <path d="M555 835c-2-46-9-86-20-121M575 840c8-48 9-91 4-129M594 842c13-38 28-72 47-101"/>
-          </g>
-          <g class="oasis-reeds oasis-reeds-right">
-            <path d="M1010 843c-4-45-1-87 8-126M1032 842c11-43 25-81 44-113M1050 842c1-38-3-73-13-105"/>
-          </g>
-        </svg>
-      </div>
-
-      <div class="oasis-dunes oasis-dunes-near">
-        <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
-          <path class="oasis-dune-dark" d="M0 786c191-60 375-57 551-5 102 30 171 56 249 56s147-26 249-56c176-52 360-55 551 5v114H0Z"/>
-          <path class="oasis-dune-light" d="M0 786c191-60 375-57 551-5 102 30 171 56 249 56s147-26 249-56c176-52 360-55 551 5v114H0Z"/>
-        </svg>
-      </div>
+    <div class="oasis-atmosphere-group" aria-hidden="true">
+      <div class="oasis-horizon-light"></div>
+      <div class="oasis-mist"></div>
+      <div class="oasis-color-wash"></div>
+      <div class="oasis-particles" id="oasisParticles"></div>
     </div>
-
-    <div class="oasis-particles oasis-particles-dark" id="oasisParticlesDark" aria-hidden="true"></div>
-    <div class="oasis-particles oasis-particles-light" id="oasisParticlesLight" aria-hidden="true"></div>
-    <div class="oasis-atmosphere" aria-hidden="true"></div>
     <div class="oasis-vignette" aria-hidden="true"></div>
-    <div class="oasis-grain" aria-hidden="true"></div>
 
     <div class="oasis-copy">
       <div class="oasis-intro">
