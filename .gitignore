@@ -1,0 +1,9 @@
+.env
+.env.*
+!.env.example
+
+# Fichiers de travail locaux
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/

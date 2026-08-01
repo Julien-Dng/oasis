@@ -1,174 +1,222 @@
 /* =====================================================================
-   Oasis — Moteur cinématographique de la page d'accueil
-   « Du désert digital à l'oasis de croissance »
-
-   - Timeline maîtresse liée au scroll (scrub) et épinglée (pin).
-   - 4 actes : désert nocturne → lueur turquoise → source d'eau → oasis.
-   - Réversible : remonter rejoue l'animation en sens inverse (scrub).
-   - Repli propre si GSAP absent ou prefers-reduced-motion : la scène
-     reste sur son état lumineux statique défini en CSS.
+   Oasis Web Agency — timeline scrollée du hero de la page d’accueil.
+   Le DOM/CSS reste une oasis statique si GSAP est absent ou si l’utilisateur
+   préfère réduire les animations.
    ===================================================================== */
 (function () {
-  var cine = document.getElementById('cine');
-  if (!cine) return;
+  'use strict';
 
-  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var journey = document.querySelector('.oasis-journey');
+  if (!journey) return;
 
-  /* ---- Génère les étoiles (toujours, même en repli : décor discret) ---- */
-  (function stars() {
-    var box = document.getElementById('cineStars');
-    if (!box) return;
-    var n = window.innerWidth < 720 ? 46 : 90, html = '';
-    for (var i = 0; i < n; i++) {
-      var x = (Math.random() * 100).toFixed(2);
-      var y = (Math.random() * 68).toFixed(2);        // étoiles surtout en haut
-      var s = (Math.random() * 1.8 + 0.6).toFixed(2);
-      var tw = (Math.random() * 4 + 2.5).toFixed(2);
-      var d = (Math.random() * 4).toFixed(2);
-      html += '<i style="left:' + x + '%;top:' + y + '%;width:' + s + 'px;height:' + s +
-        'px;--tw:' + tw + 's;animation-delay:' + d + 's"></i>';
-    }
-    box.innerHTML = html;
-  })();
+  var root = document.documentElement;
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var coarsePointer = window.matchMedia('(pointer:coarse)').matches;
+  var lowPower = (navigator.deviceMemory && navigator.deviceMemory <= 4) ||
+    (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 4);
 
-  /* ---- Génère les motes lumineuses de l'oasis ---- */
-  (function motes() {
-    var box = document.getElementById('cineMotes');
-    if (!box) return;
-    var n = window.innerWidth < 720 ? 10 : 20, html = '';
-    for (var i = 0; i < n; i++) {
-      var x = (Math.random() * 100).toFixed(2);
-      var dur = (Math.random() * 10 + 11).toFixed(2);
-      var d = (Math.random() * 14).toFixed(2);
-      var dx = (Math.random() * 80 - 40).toFixed(0);
-      html += '<i style="left:' + x + '%;--dur:' + dur + 's;--dx:' + dx +
-        'px;animation-delay:' + d + 's"></i>';
-    }
-    box.innerHTML = html;
-  })();
+  if (lowPower) root.classList.add('oasis-lite');
 
-  /* Garde le header lisible tant que la scène occupe le haut de page */
-  function headerToggle() {
-    document.body.classList.toggle('cine-active', window.scrollY < cine.offsetHeight - 80);
+  function randomFactory(seed) {
+    var state = seed >>> 0;
+    return function () {
+      state = (state * 1664525 + 1013904223) >>> 0;
+      return state / 4294967296;
+    };
   }
 
-  if (reduce || !window.gsap || !window.ScrollTrigger) {
-    /* Repli statique (scène lumineuse figée définie en CSS) */
-    headerToggle();
-    window.addEventListener('scroll', headerToggle, { passive: true });
+  function populate(containerId, count, seed, isStar) {
+    var container = document.getElementById(containerId);
+    if (!container) return;
+    var random = randomFactory(seed);
+    var fragment = document.createDocumentFragment();
+
+    for (var index = 0; index < count; index += 1) {
+      var particle = document.createElement('i');
+      var x = (random() * 100).toFixed(2) + '%';
+      var y = (random() * (isStar ? 58 : 72) + (isStar ? 1 : 12)).toFixed(2) + '%';
+      var size = (random() * (isStar ? 1.5 : 2.5) + (isStar ? .7 : 1.5)).toFixed(2) + 'px';
+      particle.style.left = x;
+      particle.style.top = y;
+      particle.style.setProperty('--size', size);
+      particle.style.setProperty('--duration', (random() * 5 + (isStar ? 3 : 6)).toFixed(2) + 's');
+      particle.style.setProperty('--delay', (-random() * 7).toFixed(2) + 's');
+      particle.style.setProperty('--drift', (random() * 32 - 16).toFixed(1) + 'px');
+      fragment.appendChild(particle);
+    }
+    container.appendChild(fragment);
+  }
+
+  var mobile = window.matchMedia('(max-width:760px)').matches;
+  var particleFactor = lowPower ? .55 : 1;
+  populate('oasisStars', Math.round((mobile ? 30 : 56) * particleFactor), 4871, true);
+  populate('oasisParticlesDark', Math.round((mobile ? 7 : 14) * particleFactor), 7319, false);
+  populate('oasisParticlesLight', Math.round((mobile ? 8 : 18) * particleFactor), 9151, false);
+
+  function staticHeaderObserver() {
+    document.body.classList.add('oasis-active');
+    if (!('IntersectionObserver' in window)) return;
+    var observer = new IntersectionObserver(function (entries) {
+      document.body.classList.toggle('oasis-active', entries[0].isIntersecting);
+    }, { threshold: .05 });
+    observer.observe(journey);
+  }
+
+  if (reduceMotion || !window.gsap || !window.ScrollTrigger) {
+    root.classList.add('oasis-static');
+    staticHeaderObserver();
     return;
   }
+
+  clearTimeout(window.__gsapFail);
   gsap.registerPlugin(ScrollTrigger);
+  root.classList.add('oasis-motion-ready');
 
-  var q = gsap.utils.selector(cine);
+  var select = gsap.utils.selector(journey);
+  var progressSteps = select('.oasis-progress span');
+  var media = gsap.matchMedia();
 
-  /* ---- État initial : nuit profonde ---- */
-  gsap.set('.sky-night', { opacity: 1 });
-  gsap.set('.sky-dawn',  { opacity: 0 });
-  gsap.set('.sky-day',   { opacity: 0 });
-  gsap.set('.cine-stars', { opacity: 1 });
-  gsap.set('.cine-motes', { opacity: 0 });
-
-  gsap.set('.cine-halo', { opacity: 0, scale: 0.25, yPercent: 26 });
-  gsap.set('.cine-sun',  { yPercent: 62, opacity: 0, scale: 0.7 });
-  gsap.set('.cine-sun-warm', { opacity: 1 });   // lever doré au départ
-
-  gsap.set('.dune-far', { color: '#0a1220', yPercent: 6 });
-  gsap.set('.dune-mid', { color: '#070c16', yPercent: 10 });
-  gsap.set('.dune-near',{ color: '#03050a', yPercent: 4 });
-
-  gsap.set('.water', { opacity: 0 });
-  gsap.set('.water .pool-group', { scaleY: 0 });
-  gsap.set('.oasis g', { scaleY: 0, opacity: 0 });
-
-  gsap.set(q('.cine-act'), { opacity: 0, y: 34 });
-  gsap.set('.act-1', { opacity: 1, y: 0 });
-
-  /* ---- Pastilles de progression ---- */
-  var dots = q('.cine-progress span');
-  function activate(i) {
-    dots.forEach(function (d, k) { d.classList.toggle('on', k === i); });
-  }
-
-  /* ---- Timeline maîtresse (liée au scroll) ----
-     Durées relatives ; scrub assure la réversibilité. */
-  var tl = gsap.timeline({
-    defaults: { ease: 'none' },
-    scrollTrigger: {
-      trigger: cine,
-      start: 'top top',
-      end: '+=' + Math.round(window.innerHeight * 4.4),
-      scrub: 0.8,
-      pin: '.cine-stage',
-      anticipatePin: 1,
-      invalidateOnRefresh: true,
-      onUpdate: function (self) {
-        var p = self.progress;
-        activate(p < 0.24 ? 0 : p < 0.5 ? 1 : p < 0.74 ? 2 : 3);
-      }
-    }
-  });
-
-  /* ===== ACTE 1 → 2 : la lueur turquoise apparaît à l'horizon ===== */
-  tl.to('.cine-hint', { opacity: 0, duration: 0.4 }, 0.02)
-    .to('.act-1', { opacity: 0, y: -34, duration: 0.6, ease: 'power2.in' }, 0.6)
-
-    .to('.cine-halo', { opacity: 0.85, scale: 1, yPercent: 0, duration: 1.6, ease: 'power2.out' }, 0.5)
-    .to('.cine-sun',  { yPercent: 6, opacity: 1, scale: 1, duration: 1.7, ease: 'power2.out' }, 0.5)
-    .to('.cine-sun-warm', { opacity: 0, duration: 1.4 }, 0.9)  // doré → turquoise
-    .to('.sky-night', { opacity: 0, duration: 1.4 }, 0.7)
-    .to('.sky-dawn',  { opacity: 1, duration: 1.4 }, 0.7)
-    .to('.cine-stars',{ opacity: 0.35, duration: 1.2 }, 0.7)
-    .to('.dune-far',  { color: '#1a2c47', duration: 1.4 }, 0.8)
-    .to('.dune-mid',  { color: '#111d31', duration: 1.4 }, 0.8)
-    .fromTo('.act-2', { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 1.4)
-
-  /* ===== ACTE 2 → 3 : révélation de la source d'eau ===== */
-    .to('.act-2', { opacity: 0, y: -34, duration: 0.6, ease: 'power2.in' }, 2.5)
-    .to('.sky-dawn', { opacity: 0, duration: 1.6 }, 2.6)
-    .to('.sky-day',  { opacity: 1, duration: 1.6 }, 2.6)
-    .to('.cine-stars', { opacity: 0, duration: 1.0 }, 2.6)
-    .to('.water', { opacity: 1, duration: 0.5 }, 2.6)
-    .to('.water .pool-group', { scaleY: 1, duration: 1.7, ease: 'power2.out' }, 2.6)
-    .to('.dune-far', { color: '#2a4162', duration: 1.6 }, 2.7)
-    .to('.dune-mid', { color: '#1b2c46', duration: 1.6 }, 2.7)
-    .to('.cine-halo', { scale: 1.1, opacity: 0.7, duration: 1.6 }, 2.7)
-    .fromTo('.act-3', { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 3.4)
-
-  /* ===== ACTE 3 → 4 : l'oasis végétale et lumineuse ===== */
-    .to('.act-3', { opacity: 0, y: -34, duration: 0.6, ease: 'power2.in' }, 4.4)
-    .to('.oasis g', { scaleY: 1, opacity: 1, duration: 1.6, stagger: 0.18, ease: 'back.out(1.4)' }, 4.4)
-    .to('.cine-motes', { opacity: 1, duration: 1.2 }, 4.8)
-    .to('.dune-near', { color: '#0a1420', duration: 1.4 }, 4.5)
-    .to('.dune-mid',  { color: '#123a3a', duration: 1.4 }, 4.5)
-    .to('.sky-day', { filter: 'saturate(1.15) brightness(1.06)', duration: 1.2 }, 4.6)
-    .to('.cine-sun', { yPercent: -4, scale: 1.06, duration: 1.4 }, 4.5)
-    .fromTo('.act-4', { opacity: 0, y: 34 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power2.out' }, 5.2);
-
-  /* ---- Parallaxe légère au pointeur (profondeur, non liée au scroll) ---- */
-  if (window.matchMedia('(pointer:fine)').matches) {
-    var qToFar  = gsap.quickTo('.dune-far',  'xPercent', { duration: 0.6, ease: 'power3' });
-    var qToMid  = gsap.quickTo('.dune-mid',  'xPercent', { duration: 0.6, ease: 'power3' });
-    var qToNear = gsap.quickTo('.dune-near', 'xPercent', { duration: 0.6, ease: 'power3' });
-    var qToSun  = gsap.quickTo('.cine-sun',  'xPercent', { duration: 0.8, ease: 'power3' });
-    cine.addEventListener('pointermove', function (e) {
-      var dx = (e.clientX / window.innerWidth - 0.5);
-      qToFar(dx * 1.4); qToMid(dx * 2.6); qToNear(dx * 4.2); qToSun(dx * -1.6);
+  function setProgress(activeIndex) {
+    progressSteps.forEach(function (step, index) {
+      step.classList.toggle('is-active', index === activeIndex);
     });
   }
 
-  document.body.classList.add('cine-loaded');
+  media.add({
+    isDesktop: '(min-width:761px)',
+    isMobile: '(max-width:760px)'
+  }, function (context) {
+    var isDesktop = context.conditions.isDesktop;
+    var depth = isDesktop ? 1 : .56;
+    var scrollScreens = isDesktop ? 3.6 : 2.7;
+    var pointerHandler;
 
-  /* ---- Header lisible tant que la scène est visible ---- */
-  ScrollTrigger.create({
-    trigger: cine,
-    start: 'top top',
-    end: '+=' + Math.round(window.innerHeight * 4.4),
-    onToggle: function (self) { document.body.classList.toggle('cine-active', self.isActive); }
+    gsap.set(select('.oasis-sky-night'), { autoAlpha: 1 });
+    gsap.set(select('.oasis-sky-dawn, .oasis-sky-day'), { autoAlpha: 0 });
+    gsap.set(select('.oasis-stars'), { autoAlpha: 1 });
+    gsap.set(select('.oasis-horizon-glow'), { autoAlpha: .2, scale: .42, xPercent: -50, yPercent: -34 });
+    gsap.set(select('.oasis-orb'), { autoAlpha: .68, scale: .34, xPercent: -50, yPercent: -20 });
+    gsap.set(select('.oasis-orb-warm'), { autoAlpha: 0 });
+    gsap.set(select('.oasis-world'), { scale: 1, transformOrigin: '50% 64%' });
+    gsap.set(select('.oasis-dunes-far'), { yPercent: 4 * depth });
+    gsap.set(select('.oasis-dunes-mid'), { yPercent: 7 * depth });
+    gsap.set(select('.oasis-dunes-near'), { yPercent: 10 * depth });
+    gsap.set(select('.oasis-dune-light'), { autoAlpha: 0 });
+    gsap.set(select('.oasis-water'), { autoAlpha: 0, scaleY: .08, yPercent: 4 });
+    gsap.set(select('.oasis-plant, .oasis-reeds'), { autoAlpha: 0, scaleY: .2, y: 32 * depth });
+    gsap.set(select('.oasis-particles-dark'), { autoAlpha: .48 });
+    gsap.set(select('.oasis-particles-light'), { autoAlpha: 0 });
+    gsap.set(select('.oasis-atmosphere'), { autoAlpha: .08 });
+    gsap.set(select('.oasis-service-bridge'), { autoAlpha: 0, yPercent: 28 });
+    gsap.set(select('.oasis-intro'), { autoAlpha: 1, y: 0 });
+    gsap.set(select('.oasis-reveal'), { autoAlpha: 0, y: 32 });
+
+    var timeline = gsap.timeline({
+      defaults: { ease: 'none' },
+      scrollTrigger: {
+        id: 'oasis-journey',
+        trigger: journey,
+        start: 'top top',
+        end: function () {
+          return '+=' + Math.round(document.documentElement.clientHeight * scrollScreens);
+        },
+        pin: select('.oasis-scene')[0],
+        pinSpacing: true,
+        anticipatePin: 1,
+        scrub: isDesktop ? .75 : .45,
+        invalidateOnRefresh: true,
+        refreshPriority: -10,
+        onToggle: function (self) {
+          document.body.classList.toggle('oasis-active', self.isActive);
+        },
+        onUpdate: function (self) {
+          var progress = self.progress;
+          setProgress(progress < .24 ? 0 : progress < .5 ? 1 : progress < .76 ? 2 : 3);
+        }
+      }
+    });
+
+    timeline
+      .addLabel('desert', 0)
+      .to(select('.oasis-scroll-hint'), { autoAlpha: 0, duration: .45 }, 'desert+=.12')
+
+      .addLabel('approach', .45)
+      .to(select('.oasis-intro'), { autoAlpha: 0, y: -42 * depth, duration: .9, ease: 'power2.in' }, 'approach+=.7')
+      .to(select('.oasis-orb'), { autoAlpha: 1, scale: .88, xPercent: -50, yPercent: -42, duration: 2.25, ease: 'power2.inOut' }, 'approach')
+      .to(select('.oasis-horizon-glow'), { autoAlpha: .78, scale: .94, xPercent: -50, yPercent: -48, duration: 2.2, ease: 'power2.out' }, 'approach')
+      .to(select('.oasis-sky-night'), { autoAlpha: .18, duration: 2 }, 'approach+=.25')
+      .to(select('.oasis-sky-dawn'), { autoAlpha: 1, duration: 2 }, 'approach+=.25')
+      .to(select('.oasis-stars'), { autoAlpha: .24, duration: 1.7 }, 'approach+=.35')
+      .to(select('.oasis-world'), { scale: 1 + .055 * depth, yPercent: -1.4 * depth, duration: 2.3, ease: 'power1.inOut' }, 'approach')
+      .to(select('.oasis-dunes-far'), { yPercent: -1.5 * depth, duration: 2.3 }, 'approach')
+      .to(select('.oasis-dunes-mid'), { yPercent: -3.5 * depth, duration: 2.3 }, 'approach')
+      .to(select('.oasis-dunes-near'), { yPercent: -6.5 * depth, duration: 2.3 }, 'approach')
+
+      .addLabel('transformation', 2.55)
+      .to(select('.oasis-sky-night'), { autoAlpha: 0, duration: 1.75 }, 'transformation')
+      .to(select('.oasis-sky-dawn'), { autoAlpha: .34, duration: 1.9 }, 'transformation')
+      .to(select('.oasis-sky-day'), { autoAlpha: 1, duration: 1.9 }, 'transformation')
+      .to(select('.oasis-stars'), { autoAlpha: 0, duration: 1.1 }, 'transformation')
+      .to(select('.oasis-dune-light'), { autoAlpha: 1, duration: 1.9, stagger: .12 }, 'transformation+=.15')
+      .to(select('.oasis-water'), { autoAlpha: 1, scaleY: 1, yPercent: 0, duration: 1.7, ease: 'power2.out' }, 'transformation+=.28')
+      .to(select('.oasis-particles-dark'), { autoAlpha: 0, y: -18, duration: 1.25 }, 'transformation+=.2')
+      .to(select('.oasis-particles-light'), { autoAlpha: .72, duration: 1.45 }, 'transformation+=.72')
+      .to(select('.oasis-atmosphere'), { autoAlpha: .54, duration: 1.7 }, 'transformation+=.35')
+      .to(select('.oasis-plant, .oasis-reeds'), {
+        autoAlpha: 1,
+        scaleY: 1,
+        y: 0,
+        duration: 1.35,
+        stagger: .13,
+        ease: 'power3.out'
+      }, 'transformation+=1.02')
+      .to(select('.oasis-orb-warm'), { autoAlpha: .76, duration: 1.5 }, 'transformation+=.8')
+      .to(select('.oasis-orb'), { scale: 1.08, xPercent: -50, yPercent: -50, duration: 1.8, ease: 'power2.out' }, 'transformation+=.4')
+      .to(select('.oasis-world'), { scale: 1 + .095 * depth, yPercent: -2.4 * depth, duration: 2.1 }, 'transformation')
+
+      .addLabel('reveal', 5.05)
+      .fromTo(select('.oasis-reveal'),
+        { autoAlpha: 0, y: 32 * depth },
+        { autoAlpha: 1, y: 0, duration: .8, ease: 'power3.out', immediateRender: false },
+        'reveal')
+      .to(select('.oasis-horizon-glow'), { autoAlpha: .92, scale: 1.08, duration: 1.25 }, 'reveal')
+
+      .addLabel('exit', 6.45)
+      .to(select('.oasis-reveal'), { autoAlpha: 0, y: -30 * depth, duration: .72, ease: 'power2.in' }, 'exit+=.42')
+      .to(select('.oasis-service-bridge'), { autoAlpha: 1, yPercent: 0, duration: 1.2, ease: 'power1.in' }, 'exit+=.15')
+      .to(select('.oasis-world'), { yPercent: -4 * depth, scale: 1 + .11 * depth, duration: 1.2 }, 'exit+=.15')
+      .to({}, { duration: .35 });
+
+    document.body.classList.add('oasis-active');
+
+    if (isDesktop && !lowPower && !coarsePointer) {
+      var farX = gsap.quickTo(select('.oasis-dunes-far')[0], 'xPercent', { duration: .7, ease: 'power3.out' });
+      var midX = gsap.quickTo(select('.oasis-dunes-mid')[0], 'xPercent', { duration: .7, ease: 'power3.out' });
+      var nearX = gsap.quickTo(select('.oasis-dunes-near')[0], 'xPercent', { duration: .7, ease: 'power3.out' });
+      var orbX = gsap.quickTo(select('.oasis-orb')[0], 'x', { duration: .9, ease: 'power3.out' });
+      pointerHandler = function (event) {
+        var offset = event.clientX / window.innerWidth - .5;
+        farX(offset * 1.2);
+        midX(offset * 2.2);
+        nearX(offset * 3.5);
+        orbX(offset * -8);
+      };
+      journey.addEventListener('pointermove', pointerHandler, { passive: true });
+    }
+
+    return function () {
+      if (pointerHandler) journey.removeEventListener('pointermove', pointerHandler);
+      document.body.classList.remove('oasis-active');
+      setProgress(0);
+    };
   });
-  document.body.classList.add('cine-active');
+
+  function refreshScene() {
+    ScrollTrigger.refresh();
+  }
 
   if (document.fonts && document.fonts.ready) {
-    document.fonts.ready.then(function () { ScrollTrigger.refresh(); });
+    document.fonts.ready.then(refreshScene);
   }
-})();
+  window.addEventListener('load', refreshScene, { once: true });
+}());

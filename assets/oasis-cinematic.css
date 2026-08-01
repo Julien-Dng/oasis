@@ -1,222 +1,418 @@
 /* =====================================================================
-   Oasis — Expérience cinématographique de la page d'accueil
-   « Du désert digital à l'oasis de croissance »
-   Auto-contenu : ne dépend que des tokens de fonts globaux.
-   États par défaut = version statique lumineuse (fallback sans JS /
-   prefers-reduced-motion). GSAP prend le relais pour l'état nocturne
-   initial et l'animation liée au scroll.
+   Oasis Web Agency — « Du désert digital à l’oasis de croissance »
+
+   Les styles par défaut décrivent l’oasis finale statique. La timeline
+   ajoute l’état nocturne uniquement quand GSAP et ScrollTrigger sont prêts.
    ===================================================================== */
 
-.cine{
+.oasis-journey{
+  --oasis-night:#030711;
+  --oasis-night-soft:#081225;
+  --oasis-indigo:#0b1730;
+  --oasis-turquoise:#2dd4bf;
+  --oasis-aqua:#9ff8e8;
+  --oasis-deep:#075c62;
+  --oasis-sand:#26384a;
+  --oasis-sand-light:#51666f;
+  --oasis-warm:#efc77a;
+  --oasis-white:#f5fffd;
   position:relative;
-  /* Palette dédiée à la scène (indépendante du thème clair/sombre) */
-  --night:#05070c;
-  --night-2:#0a1220;
-  --indigo:#0d1b33;
-  --dawn:#20304f;
-  --amber:#e8b65a;
-  --amber-soft:#f0c97a;
-  --turq:#2dd4bf;
-  --turq-bright:#6beedc;
-  --turq-deep:#0c9385;
-  --oasis-green:#34c9a0;
-  --sand-far:#132033;
-  --sand-mid:#0c1524;
-  --sand-near:#05080e;
-  color:#fff;
   isolation:isolate;
+  color:var(--oasis-white);
+  background:var(--oasis-night);
 }
 
-/* La scène occupe tout l'écran ; GSAP l'épingle (pin) pendant le scroll. */
-.cine-stage{
+.oasis-scene{
   position:relative;
-  height:100vh;
-  min-height:640px;
   width:100%;
+  height:100vh;
+  height:100svh;
+  min-height:680px;
   overflow:hidden;
-  background:#05070c;
+  background:var(--oasis-night);
+  contain:paint;
 }
 
-/* ---------- Ciel : trois couches superposées en fondu enchaîné ---------- */
-.cine-sky{position:absolute;inset:0;will-change:opacity}
-.sky-night{
-  background:
-    radial-gradient(120% 80% at 50% 108%, #0b1626 0%, #070b14 40%, #04060b 100%);
+.oasis-sky,
+.oasis-world,
+.oasis-world>div,
+.oasis-particles,
+.oasis-atmosphere,
+.oasis-vignette,
+.oasis-grain,
+.oasis-service-bridge{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.oasis-sky{will-change:opacity}
+.oasis-sky-night{
   opacity:0;
-}
-.sky-dawn{
   background:
-    radial-gradient(90% 70% at 50% 96%, rgba(232,182,90,.35) 0%, rgba(45,212,191,.10) 26%, transparent 55%),
-    linear-gradient(180deg, #0c1730 0%, #16233f 45%, #24304a 100%);
+    radial-gradient(95% 48% at 50% 60%,rgba(16,69,79,.24),transparent 58%),
+    linear-gradient(180deg,#02040a 0%,#050a16 48%,#0a1627 100%);
+}
+.oasis-sky-dawn{
   opacity:0;
-}
-.sky-day{
   background:
-    radial-gradient(85% 65% at 50% 92%, rgba(107,238,220,.55) 0%, rgba(45,212,191,.22) 34%, transparent 62%),
-    linear-gradient(180deg, #0b2f3f 0%, #114f57 46%, #1c7f74 100%);
-  opacity:1; /* état statique par défaut = jour */
+    radial-gradient(60% 52% at 50% 61%,rgba(45,212,191,.34),transparent 62%),
+    linear-gradient(180deg,#07101f 0%,#102c42 55%,#26656b 100%);
+}
+.oasis-sky-day{
+  opacity:1;
+  background:
+    radial-gradient(72% 52% at 50% 61%,rgba(239,199,122,.28),transparent 30%),
+    radial-gradient(90% 68% at 50% 72%,rgba(159,248,232,.54),transparent 58%),
+    linear-gradient(180deg,#0b3146 0%,#12606b 48%,#43ad9e 100%);
 }
 
-/* ---------- Étoiles (générées en JS) ---------- */
-.cine-stars{position:absolute;inset:0;opacity:0;pointer-events:none;will-change:opacity}
-.cine-stars i{
-  position:absolute;border-radius:50%;background:#fff;
-  box-shadow:0 0 6px 1px rgba(255,255,255,.6);
-  animation:cine-twinkle var(--tw,4s) ease-in-out infinite;
+.oasis-stars{z-index:1;opacity:.08}
+.oasis-stars i{
+  position:absolute;
+  width:var(--size,2px);
+  height:var(--size,2px);
+  border-radius:50%;
+  background:#fff;
+  box-shadow:0 0 8px rgba(207,255,247,.65);
+  animation:oasis-twinkle var(--duration,4s) ease-in-out infinite var(--delay,0s);
 }
-@keyframes cine-twinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
-
-/* ---------- Halo turquoise à l'horizon + soleil ---------- */
-.cine-halo{
-  position:absolute;left:50%;top:60%;width:150vw;height:110vh;
-  transform:translate(-50%,-50%) scale(1);
-  background:radial-gradient(closest-side,
-    rgba(107,238,220,.55) 0%, rgba(45,212,191,.28) 34%, rgba(12,147,133,.10) 58%, transparent 74%);
-  opacity:.7;filter:blur(6px);pointer-events:none;will-change:transform,opacity;
-}
-.cine-sun{
-  position:absolute;left:50%;top:34%;width:min(46vh,340px);aspect-ratio:1;
-  transform:translate(-50%,-50%);pointer-events:none;will-change:transform,opacity;
-}
-.cine-sun-disc{
-  position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle at 50% 46%, #eafff9 0%, var(--turq-bright) 26%, var(--turq) 55%, rgba(12,147,133,0) 72%);
-  box-shadow:0 0 90px 18px rgba(45,212,191,.45);
-}
-.cine-sun-warm{
-  position:absolute;inset:0;border-radius:50%;
-  background:radial-gradient(circle at 50% 46%, #fff4dd 0%, var(--amber-soft) 30%, var(--amber) 58%, rgba(232,182,90,0) 74%);
-  opacity:0; /* état statique = soleil turquoise ; JS le fait apparaître doré au lever */
+@keyframes oasis-twinkle{
+  0%,100%{opacity:.15;transform:scale(.72)}
+  50%{opacity:.9;transform:scale(1)}
 }
 
-/* ---------- Scène : dunes / eau / oasis ---------- */
-.cine-scene,.scene-layer{position:absolute;inset:0;pointer-events:none}
-.scene-layer{will-change:transform,color,opacity}
-.scene-layer svg{position:absolute;inset:0;width:100%;height:100%;display:block}
-
-.dune-far{color:var(--sand-far)}
-.dune-mid{color:var(--sand-mid)}
-.dune-near{color:var(--sand-near)}
-
-/* Eau : la source jaillit du bas (scaleY) */
-.water{color:var(--turq);opacity:1}
-.water .pool-group{transform-box:fill-box;transform-origin:bottom center}
-.water .pool-still{fill:url(#cineWaterGrad)}
-.water .pool-shimmer{stroke:rgba(234,255,249,.7);stroke-width:1.4;fill:none;
-  opacity:.8;animation:cine-shimmer 5.5s ease-in-out infinite}
-@keyframes cine-shimmer{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.85;transform:translateY(-2px)}}
-
-/* Oasis : végétation en trait lumineux qui pousse */
-.oasis{color:var(--oasis-green)}
-.oasis g{transform-box:fill-box;transform-origin:bottom center}
-.oasis path{stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round;
-  filter:drop-shadow(0 0 5px rgba(52,201,160,.55))}
-
-/* ---------- Motes / pollen lumineux ---------- */
-.cine-motes{position:absolute;inset:0;opacity:0;pointer-events:none;will-change:opacity}
-.cine-motes i{
-  position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;
-  background:radial-gradient(circle,#eafff9,rgba(107,238,220,.2));
-  box-shadow:0 0 8px 2px rgba(107,238,220,.5);
-  animation:cine-rise var(--dur,14s) linear infinite;
-}
-@keyframes cine-rise{
-  0%{transform:translateY(0) translateX(0);opacity:0}
-  10%{opacity:.9}
-  90%{opacity:.7}
-  100%{transform:translateY(-92vh) translateX(var(--dx,20px));opacity:0}
+.oasis-horizon-glow{
+  position:absolute;
+  z-index:2;
+  left:50%;
+  top:58%;
+  width:150vw;
+  height:72vh;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  opacity:.88;
+  background:radial-gradient(closest-side,rgba(159,248,232,.5),rgba(45,212,191,.19) 42%,transparent 74%);
+  filter:blur(10px);
+  pointer-events:none;
+  will-change:transform,opacity;
 }
 
-/* ---------- Voiles cinématographiques ---------- */
-.cine-vignette{position:absolute;inset:0;pointer-events:none;
-  background:radial-gradient(120% 90% at 50% 46%, transparent 52%, rgba(0,0,0,.42) 100%)}
-.cine-grain{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
-
-/* ---------- Textes (actes) ---------- */
-.cine-acts{position:absolute;inset:0;display:flex;align-items:center;z-index:5}
-.cine-acts .wrap{width:100%;max-width:1180px;margin-inline:auto;
-  padding-inline:clamp(20px,5vw,40px);position:relative}
-.cine-act{
-  position:absolute;top:50%;left:clamp(20px,5vw,40px);right:clamp(20px,5vw,40px);
-  transform:translateY(-50%);max-width:800px;opacity:0;
+.oasis-orb{
+  position:absolute;
+  z-index:3;
+  left:50%;
+  top:58%;
+  width:clamp(176px,22vw,360px);
+  aspect-ratio:1;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  pointer-events:none;
+  will-change:transform,opacity;
 }
-.cine-act.act-4{opacity:1} /* état statique par défaut = résolution */
-
-.cine-eyebrow{
-  display:inline-flex;align-items:center;gap:10px;
-  font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
-  color:var(--turq-bright);margin-bottom:22px;
+.oasis-orb-core,
+.oasis-orb-warm{
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
 }
-.cine-eyebrow::before{content:"";width:26px;height:1px;background:var(--turq-bright);opacity:.7}
-.cine-act h1,.cine-act h2{
-  font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;
-  line-height:1.02;letter-spacing:-.03em;text-wrap:balance;
-  font-size:clamp(2.5rem,7vw,5.4rem);margin:0 0 22px;
+.oasis-orb-core{
+  background:radial-gradient(circle at 48% 44%,#f5fffd 0 5%,var(--oasis-aqua) 26%,var(--oasis-turquoise) 54%,rgba(45,212,191,0) 73%);
+  box-shadow:0 0 90px 18px rgba(45,212,191,.42),0 0 180px 52px rgba(45,212,191,.16);
+}
+.oasis-orb-warm{
+  opacity:.72;
+  background:radial-gradient(circle at 50% 47%,#fff9e9 0 8%,#f6d999 28%,var(--oasis-warm) 55%,rgba(239,199,122,0) 74%);
+}
+
+.oasis-world{z-index:4;will-change:transform}
+.oasis-world>div{will-change:transform,opacity}
+.oasis-world svg{display:block;width:100%;height:100%}
+.oasis-dunes-far{z-index:1}
+.oasis-dunes-mid{z-index:3}
+.oasis-water{z-index:4;opacity:1;transform-origin:50% 74%}
+.oasis-vegetation{z-index:5;color:#0c4f4d}
+.oasis-dunes-near{z-index:6}
+
+.oasis-dune-dark,.oasis-dune-light{transition:none}
+.oasis-dunes-far .oasis-dune-dark{fill:#0a1424}
+.oasis-dunes-mid .oasis-dune-dark{fill:#07101d}
+.oasis-dunes-near .oasis-dune-dark{fill:#03070e}
+.oasis-dunes-far .oasis-dune-light{fill:#496572}
+.oasis-dunes-mid .oasis-dune-light{fill:#263f4d}
+.oasis-dunes-near .oasis-dune-light{fill:#10282f}
+.oasis-dune-light{opacity:1}
+
+.oasis-water-body{fill:url(#oasisWaterGradient)}
+.oasis-water-reflection{fill:url(#oasisReflectionGradient);filter:blur(2px)}
+.oasis-ripples path{
+  fill:none;
+  stroke:rgba(226,255,250,.66);
+  stroke-width:2;
+  stroke-linecap:round;
+  animation:oasis-shimmer 5s ease-in-out infinite;
+}
+.oasis-ripples path:nth-child(2){animation-delay:-1.6s}
+.oasis-ripples path:nth-child(3){animation-delay:-3.2s}
+@keyframes oasis-shimmer{
+  0%,100%{opacity:.28;transform:scaleX(.96)}
+  50%{opacity:.82;transform:scaleX(1.025)}
+}
+
+.oasis-plant,.oasis-reeds{
+  transform-box:fill-box;
+  transform-origin:bottom center;
+}
+.oasis-plant path:not(.oasis-trunk){fill:currentColor;stroke:rgba(104,238,210,.18);stroke-width:1.2}
+.oasis-plant .oasis-trunk,
+.oasis-reeds path{
+  fill:none;
+  stroke:currentColor;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.oasis-plant .oasis-trunk{stroke-width:13}
+.oasis-reeds path{stroke-width:5}
+.oasis-plant,.oasis-reeds{filter:drop-shadow(0 0 12px rgba(45,212,191,.16))}
+
+.oasis-particles{z-index:7}
+.oasis-particles-dark{opacity:0}
+.oasis-particles-light{opacity:.7}
+.oasis-particles i{
+  position:absolute;
+  left:var(--x);
+  top:var(--y);
+  width:var(--size);
+  height:var(--size);
+  border-radius:50%;
+  animation:oasis-drift var(--duration) ease-in-out infinite alternate var(--delay);
+}
+.oasis-particles-dark i{background:rgba(69,109,125,.62);box-shadow:0 0 8px rgba(30,78,92,.45)}
+.oasis-particles-light i{background:rgba(231,255,250,.9);box-shadow:0 0 12px 2px rgba(98,244,220,.55)}
+@keyframes oasis-drift{
+  from{transform:translate3d(0,10px,0);opacity:.18}
+  to{transform:translate3d(var(--drift),-18px,0);opacity:.8}
+}
+.oasis-lite .oasis-particles i{animation:none}
+.oasis-lite .oasis-grain{display:none}
+
+.oasis-atmosphere{
+  z-index:8;
+  opacity:.42;
+  background:
+    linear-gradient(112deg,transparent 14%,rgba(159,248,232,.08) 46%,transparent 63%),
+    radial-gradient(68% 34% at 50% 64%,rgba(239,199,122,.15),transparent 66%);
+  mix-blend-mode:screen;
+  will-change:opacity;
+}
+.oasis-vignette{
+  z-index:9;
+  background:radial-gradient(105% 88% at 50% 48%,transparent 52%,rgba(0,4,10,.5) 100%);
+  will-change:opacity;
+}
+.oasis-grain{
+  z-index:10;
+  opacity:.045;
+  mix-blend-mode:soft-light;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='110' height='110'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.82' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.8'/%3E%3C/svg%3E");
+}
+
+.oasis-copy{
+  position:absolute;
+  z-index:12;
+  inset:0;
+  display:grid;
+  place-items:center;
+  width:min(1180px,100%);
+  margin-inline:auto;
+  padding:clamp(92px,12vh,128px) clamp(20px,5vw,48px) clamp(96px,13vh,142px);
+  text-align:center;
+}
+.oasis-intro{width:100%;min-width:0;max-width:1040px;will-change:transform,opacity}
+.oasis-kicker{
+  display:inline-flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:22px;
+  font-family:var(--font-mono,'JetBrains Mono',ui-monospace,monospace);
+  font-size:.7rem;
+  letter-spacing:.26em;
+  text-transform:uppercase;
+  color:var(--oasis-aqua);
+}
+.oasis-kicker::before,.oasis-kicker::after{content:"";width:24px;height:1px;background:currentColor;opacity:.58}
+.oasis-intro h1,.oasis-reveal h2{
+  margin:0;
+  font-family:var(--font-display,'Bricolage Grotesque',system-ui,sans-serif);
+  font-weight:800;
+  line-height:.98;
+  letter-spacing:-.045em;
   color:#fff;
+  text-wrap:balance;
+  text-shadow:0 4px 38px rgba(0,5,13,.42);
 }
-.cine-act .grad{
-  background:linear-gradient(100deg,var(--turq-bright),var(--amber-soft));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
+.oasis-intro h1{font-size:clamp(3rem,7.15vw,6.2rem)}
+.oasis-intro h1 span{
+  color:transparent;
+  background:linear-gradient(100deg,var(--oasis-aqua),var(--oasis-turquoise) 58%,var(--oasis-warm));
+  -webkit-background-clip:text;
+  background-clip:text;
 }
-.cine-act p{
-  font-size:clamp(1.05rem,2vw,1.34rem);line-height:1.55;
-  color:rgba(255,255,255,.82);max-width:46ch;margin:0;
+.oasis-intro p{
+  max-width:720px;
+  margin:26px auto 0;
+  font-size:clamp(1rem,1.7vw,1.24rem);
+  line-height:1.58;
+  color:rgba(239,250,250,.82);
+  text-wrap:balance;
+  text-shadow:0 2px 22px rgba(0,4,10,.65);
 }
-.cine-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:34px}
-.cine-btn{
-  display:inline-flex;align-items:center;gap:9px;height:50px;padding:0 24px;border-radius:12px;
-  font-weight:600;font-size:1rem;transition:transform .25s var(--ease,cubic-bezier(.22,1,.36,1)),box-shadow .25s,background .25s;
+.oasis-actions{display:flex;max-width:100%;justify-content:center;flex-wrap:wrap;gap:12px;margin-top:32px}
+.oasis-button{
+  display:inline-flex;
+  min-height:50px;
+  align-items:center;
+  justify-content:center;
+  gap:9px;
+  padding:0 23px;
+  border:1px solid transparent;
+  border-radius:12px;
+  font-weight:650;
+  font-size:.96rem;
+  max-width:100%;
+  transition:transform .25s var(--ease,cubic-bezier(.22,1,.36,1)),background .25s,border-color .25s,box-shadow .25s;
 }
-.cine-btn svg{width:20px;height:20px}
-.cine-btn-primary{background:var(--turq);color:#05201c;box-shadow:0 12px 34px -10px rgba(45,212,191,.7)}
-.cine-btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px -12px rgba(45,212,191,.85)}
-.cine-btn-ghost{border:1px solid rgba(255,255,255,.28);color:#fff}
-.cine-btn-ghost:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.06)}
+.oasis-button svg{width:19px;height:19px}
+.oasis-button-primary{color:#04241f;background:var(--oasis-aqua);box-shadow:0 14px 36px -14px rgba(45,212,191,.85)}
+.oasis-button-secondary{color:#fff;border-color:rgba(255,255,255,.34);background:rgba(4,17,28,.34);backdrop-filter:blur(10px)}
+.oasis-button:hover{transform:translateY(-2px)}
+.oasis-button-primary:hover{box-shadow:0 18px 42px -13px rgba(45,212,191,.95)}
+.oasis-button-secondary:hover{border-color:rgba(255,255,255,.65);background:rgba(255,255,255,.08)}
+.oasis-button:focus-visible{outline:3px solid var(--oasis-warm);outline-offset:4px}
 
-/* ---------- Indice de scroll ---------- */
-.cine-hint{
-  position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:6;
-  display:flex;flex-direction:column;align-items:center;gap:10px;
-  font-family:'JetBrains Mono',ui-monospace,monospace;
-  font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;
-  color:rgba(255,255,255,.6);pointer-events:none;
+.oasis-reveal{
+  position:absolute;
+  left:clamp(20px,5vw,48px);
+  right:clamp(20px,5vw,48px);
+  bottom:clamp(82px,10vh,120px);
+  opacity:1;
+  text-align:center;
+  will-change:transform,opacity;
 }
-.cine-hint i{position:relative;width:22px;height:34px;border:1.5px solid rgba(255,255,255,.45);border-radius:12px}
-.cine-hint i::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:6px;border-radius:2px;
-  background:var(--turq-bright);transform:translateX(-50%);animation:cine-wheel 1.8s ease-in-out infinite}
-@keyframes cine-wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(-50%,12px)}}
+.oasis-reveal h2{font-size:clamp(2.7rem,6vw,5.3rem)}
 
-/* ---------- Pastilles de progression des actes ---------- */
-.cine-progress{position:absolute;right:clamp(18px,3vw,34px);top:50%;transform:translateY(-50%);
-  z-index:6;display:flex;flex-direction:column;gap:12px;pointer-events:none}
-.cine-progress span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);
-  transition:background .35s,transform .35s,box-shadow .35s}
-.cine-progress span.on{background:var(--turq-bright);transform:scale(1.35);
-  box-shadow:0 0 12px 2px rgba(107,238,220,.6)}
-
-/* ---------- Header lisible pendant la scène ---------- */
-body.cine-active .header::before{
-  content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
-  background:linear-gradient(180deg,rgba(3,5,9,.55),transparent);
+.oasis-scroll-hint{
+  position:absolute;
+  z-index:13;
+  left:50%;
+  bottom:26px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:9px;
+  transform:translateX(-50%);
+  color:rgba(255,255,255,.66);
+  font-family:var(--font-mono,'JetBrains Mono',ui-monospace,monospace);
+  font-size:.62rem;
+  letter-spacing:.23em;
+  text-transform:uppercase;
+  white-space:nowrap;
+  pointer-events:none;
 }
-body.cine-active .header .brand,
-body.cine-active .header .nav-links a,
-body.cine-active .header .nav-item>a{color:#fff !important}
-body.cine-active .header .brand-logo{fill:#fff !important}
-body.cine-active .header .icon-btn{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.2)}
-body.cine-active .header.scrolled{background:rgba(5,7,12,.5)}
+.oasis-scroll-hint i{position:relative;width:1px;height:34px;background:rgba(255,255,255,.28);overflow:hidden}
+.oasis-scroll-hint i::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent,var(--oasis-aqua),transparent);
+  transform:translateY(-100%);
+  animation:oasis-scroll-line 1.8s ease-in-out infinite;
+}
+@keyframes oasis-scroll-line{to{transform:translateY(100%)}}
 
-/* ---------- Réglages responsive ---------- */
-@media (max-width:720px){
-  .cine-progress{display:none}
-  .cine-act p{max-width:100%}
-  .cine-sun{width:min(34vh,240px)}
+.oasis-progress{
+  position:absolute;
+  z-index:13;
+  right:clamp(18px,3vw,34px);
+  top:50%;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  transform:translateY(-50%);
+}
+.oasis-progress span{
+  width:3px;
+  height:22px;
+  border-radius:2px;
+  background:rgba(255,255,255,.18);
+  transition:background .25s,transform .25s;
+}
+.oasis-progress span.is-active{background:var(--oasis-aqua);transform:scaleY(1.28);box-shadow:0 0 12px rgba(45,212,191,.55)}
+
+.oasis-service-bridge{
+  z-index:11;
+  top:auto;
+  height:34vh;
+  opacity:1;
+  background:linear-gradient(180deg,transparent 0%,color-mix(in srgb,var(--bg) 35%,transparent) 58%,var(--bg) 100%);
+  will-change:opacity,transform;
 }
 
-/* ---------- Repli mouvement réduit : scène lumineuse figée ---------- */
+body.oasis-active .header::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-1;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(2,5,11,.62),transparent);
+}
+body.oasis-active .header .brand,
+body.oasis-active .header .nav-links a,
+body.oasis-active .header .nav-item>a{color:#fff!important}
+body.oasis-active .header .brand-logo{fill:#fff!important}
+body.oasis-active .header .icon-btn{color:rgba(255,255,255,.9);border-color:rgba(255,255,255,.2)}
+body.oasis-active .header.scrolled{background:rgba(3,9,17,.54)}
+
+@media (max-width:760px){
+  .oasis-scene{min-height:700px}
+  .oasis-copy{padding-inline:20px;padding-top:100px;padding-bottom:112px}
+  .oasis-intro h1{font-size:clamp(2.25rem,10.5vw,3.5rem);line-height:1.01}
+  .oasis-intro p{max-width:34ch;margin-top:20px;font-size:.98rem}
+  .oasis-actions{flex-direction:column;align-items:stretch;width:100%;max-width:340px;margin:26px auto 0}
+  .oasis-button{width:100%}
+  .oasis-kicker{margin-bottom:16px;font-size:.62rem;letter-spacing:.2em}
+  .oasis-kicker::before,.oasis-kicker::after{width:16px}
+  .oasis-orb{width:min(42vw,220px)}
+  .oasis-vegetation{transform:scaleX(.58);transform-origin:50% 100%}
+  .oasis-progress{display:none}
+  .oasis-scroll-hint{bottom:19px}
+  .oasis-reveal{bottom:82px}
+  .oasis-reveal h2{font-size:clamp(2.4rem,12vw,3.8rem)}
+}
+
+@media (max-height:720px) and (min-width:761px){
+  .oasis-scene{min-height:600px}
+  .oasis-copy{padding-top:92px;padding-bottom:82px}
+  .oasis-intro h1{font-size:clamp(2.7rem,6.5vw,4.8rem)}
+  .oasis-intro p{margin-top:18px}
+  .oasis-actions{margin-top:22px}
+  .oasis-scroll-hint{bottom:14px}
+}
+
 @media (prefers-reduced-motion:reduce){
-  .cine-stars i,.pool-shimmer,.cine-motes i,.cine-hint i::after{animation:none}
-  .cine-hint{display:none}
+  .oasis-scene{height:auto;min-height:max(760px,100svh)}
+  .oasis-stars i,.oasis-particles i,.oasis-ripples path,.oasis-scroll-hint i::after{animation:none!important}
+  .oasis-scroll-hint,.oasis-progress{display:none}
+  .oasis-copy{position:relative;min-height:max(760px,100svh);padding-bottom:190px}
+  .oasis-reveal{bottom:72px}
+  .oasis-button{transition:none}
+}
+
+@media (prefers-reduced-motion:reduce) and (max-width:760px){
+  .oasis-scene,.oasis-copy{min-height:820px}
+  .oasis-copy{padding-bottom:205px}
+  .oasis-intro h1{font-size:clamp(2.2rem,10.4vw,3rem)}
+  .oasis-reveal{bottom:72px}
+  .oasis-reveal .oasis-kicker{margin-bottom:10px}
+  .oasis-reveal h2{font-size:2.35rem}
 }
