@@ -480,3 +480,7 @@ body{
 .mm-sub a{font-size:1.15rem!important;font-weight:600!important;color:var(--fg-muted);padding:12px 0!important}
 .mm-heading{font-family:var(--font-mono)!important;font-size:.72rem!important;letter-spacing:.16em;text-transform:uppercase;
   color:var(--fg-faint)!important;border:none!important;padding:18px 0 4px!important}
+
+.footer-legal{display:flex;gap:20px;flex-wrap:wrap}
+.footer-legal a{color:var(--fg-faint);font-size:.85rem;transition:color .25s var(--ease)}
+.footer-legal a:hover{color:var(--water-bright)}
