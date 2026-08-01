@@ -9,7 +9,7 @@ Déposer ici les visuels des projets, avec **exactement** ces noms de fichiers
 | Vallourec          | w2    | `vallourec.webp`            |
 | Acupuncture Sanbao | w3    | `acupuncture-sanbao.png`    |
 | N'oublie jamais    | w4    | `noublie-jamais.png`        |
-| Maison San Tea     | w5    | `maison-san-tea.jpg`        |
+| Maison San Tea     | w5    | `maison-san-tea.webp`       |
 | SafeTalk           | w7    | `safetalk.jpg`              |
 
 ATLHES (w6) conserve son dégradé : aucune image n'est attendue.

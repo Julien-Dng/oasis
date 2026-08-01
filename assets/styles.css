@@ -237,7 +237,7 @@ body{
 .w2::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/vallourec.webp")}
 .w3::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/acupuncture-sanbao.png")}
 .w4::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/noublie-jamais.png")}
-.w5::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/maison-san-tea.jpg")}
+.w5::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/maison-san-tea.webp")}
 .w7::after{background-image:linear-gradient(180deg,rgba(11,10,8,.42),rgba(11,10,8,.04) 42%,rgba(11,10,8,.86)),url("images/realisations/safetalk.jpg")}
 
 /* ============ CTA ============ */
