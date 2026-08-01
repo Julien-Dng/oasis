@@ -18,15 +18,8 @@
   clearTimeout(window.__gsapFail);
   gsap.registerPlugin(ScrollTrigger);
 
-  /* 1) Entrée du hero — timeline au chargement */
-  var heroEls = ['.hero .hero-badge', '.hero h1', '.hero .hero-sub', '.hero .hero-cta', '.hero .marquee'];
-  gsap.set(heroEls, { opacity: 0, y: 24 });
-  gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.9 } })
-    .to('.hero .hero-badge', { opacity: 1, y: 0, duration: 0.6 }, 0.10)
-    .to('.hero h1',        { opacity: 1, y: 0 },                 0.20)
-    .to('.hero .hero-sub', { opacity: 1, y: 0 },                 0.42)
-    .to('.hero .hero-cta', { opacity: 1, y: 0 },                 0.56)
-    .to('.hero .marquee',  { opacity: 1, y: 0, duration: 0.7 },  0.70);
+  /* (L'entrée du hero est désormais gérée par l'expérience cinématique
+     de la page d'accueil — voir assets/oasis-cinematic.js) */
 
   /* 2) Barre de progression de scroll (injectée, décorative) */
   var bar = document.createElement('div');
@@ -67,12 +60,6 @@
       scrollTrigger: { trigger: '.stats', start: 'top 82%', once: true }
     });
   }
-
-  /* 6) Parallax léger : le contenu du hero glisse/estompe au scroll */
-  gsap.to('.hero .wrap', {
-    yPercent: -8, opacity: 0.55, ease: 'none',
-    scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: true }
-  });
 
   /* Recalcul quand les polices embarquées sont prêtes (le layout bouge) */
   if (document.fonts && document.fonts.ready) {

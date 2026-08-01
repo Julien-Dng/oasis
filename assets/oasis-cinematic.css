@@ -1,0 +1,222 @@
+/* =====================================================================
+   Oasis — Expérience cinématographique de la page d'accueil
+   « Du désert digital à l'oasis de croissance »
+   Auto-contenu : ne dépend que des tokens de fonts globaux.
+   États par défaut = version statique lumineuse (fallback sans JS /
+   prefers-reduced-motion). GSAP prend le relais pour l'état nocturne
+   initial et l'animation liée au scroll.
+   ===================================================================== */
+
+.cine{
+  position:relative;
+  /* Palette dédiée à la scène (indépendante du thème clair/sombre) */
+  --night:#05070c;
+  --night-2:#0a1220;
+  --indigo:#0d1b33;
+  --dawn:#20304f;
+  --amber:#e8b65a;
+  --amber-soft:#f0c97a;
+  --turq:#2dd4bf;
+  --turq-bright:#6beedc;
+  --turq-deep:#0c9385;
+  --oasis-green:#34c9a0;
+  --sand-far:#132033;
+  --sand-mid:#0c1524;
+  --sand-near:#05080e;
+  color:#fff;
+  isolation:isolate;
+}
+
+/* La scène occupe tout l'écran ; GSAP l'épingle (pin) pendant le scroll. */
+.cine-stage{
+  position:relative;
+  height:100vh;
+  min-height:640px;
+  width:100%;
+  overflow:hidden;
+  background:#05070c;
+}
+
+/* ---------- Ciel : trois couches superposées en fondu enchaîné ---------- */
+.cine-sky{position:absolute;inset:0;will-change:opacity}
+.sky-night{
+  background:
+    radial-gradient(120% 80% at 50% 108%, #0b1626 0%, #070b14 40%, #04060b 100%);
+  opacity:0;
+}
+.sky-dawn{
+  background:
+    radial-gradient(90% 70% at 50% 96%, rgba(232,182,90,.35) 0%, rgba(45,212,191,.10) 26%, transparent 55%),
+    linear-gradient(180deg, #0c1730 0%, #16233f 45%, #24304a 100%);
+  opacity:0;
+}
+.sky-day{
+  background:
+    radial-gradient(85% 65% at 50% 92%, rgba(107,238,220,.55) 0%, rgba(45,212,191,.22) 34%, transparent 62%),
+    linear-gradient(180deg, #0b2f3f 0%, #114f57 46%, #1c7f74 100%);
+  opacity:1; /* état statique par défaut = jour */
+}
+
+/* ---------- Étoiles (générées en JS) ---------- */
+.cine-stars{position:absolute;inset:0;opacity:0;pointer-events:none;will-change:opacity}
+.cine-stars i{
+  position:absolute;border-radius:50%;background:#fff;
+  box-shadow:0 0 6px 1px rgba(255,255,255,.6);
+  animation:cine-twinkle var(--tw,4s) ease-in-out infinite;
+}
+@keyframes cine-twinkle{0%,100%{opacity:.15;transform:scale(.7)}50%{opacity:1;transform:scale(1)}}
+
+/* ---------- Halo turquoise à l'horizon + soleil ---------- */
+.cine-halo{
+  position:absolute;left:50%;top:60%;width:150vw;height:110vh;
+  transform:translate(-50%,-50%) scale(1);
+  background:radial-gradient(closest-side,
+    rgba(107,238,220,.55) 0%, rgba(45,212,191,.28) 34%, rgba(12,147,133,.10) 58%, transparent 74%);
+  opacity:.7;filter:blur(6px);pointer-events:none;will-change:transform,opacity;
+}
+.cine-sun{
+  position:absolute;left:50%;top:34%;width:min(46vh,340px);aspect-ratio:1;
+  transform:translate(-50%,-50%);pointer-events:none;will-change:transform,opacity;
+}
+.cine-sun-disc{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 50% 46%, #eafff9 0%, var(--turq-bright) 26%, var(--turq) 55%, rgba(12,147,133,0) 72%);
+  box-shadow:0 0 90px 18px rgba(45,212,191,.45);
+}
+.cine-sun-warm{
+  position:absolute;inset:0;border-radius:50%;
+  background:radial-gradient(circle at 50% 46%, #fff4dd 0%, var(--amber-soft) 30%, var(--amber) 58%, rgba(232,182,90,0) 74%);
+  opacity:0; /* état statique = soleil turquoise ; JS le fait apparaître doré au lever */
+}
+
+/* ---------- Scène : dunes / eau / oasis ---------- */
+.cine-scene,.scene-layer{position:absolute;inset:0;pointer-events:none}
+.scene-layer{will-change:transform,color,opacity}
+.scene-layer svg{position:absolute;inset:0;width:100%;height:100%;display:block}
+
+.dune-far{color:var(--sand-far)}
+.dune-mid{color:var(--sand-mid)}
+.dune-near{color:var(--sand-near)}
+
+/* Eau : la source jaillit du bas (scaleY) */
+.water{color:var(--turq);opacity:1}
+.water .pool-group{transform-box:fill-box;transform-origin:bottom center}
+.water .pool-still{fill:url(#cineWaterGrad)}
+.water .pool-shimmer{stroke:rgba(234,255,249,.7);stroke-width:1.4;fill:none;
+  opacity:.8;animation:cine-shimmer 5.5s ease-in-out infinite}
+@keyframes cine-shimmer{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:.85;transform:translateY(-2px)}}
+
+/* Oasis : végétation en trait lumineux qui pousse */
+.oasis{color:var(--oasis-green)}
+.oasis g{transform-box:fill-box;transform-origin:bottom center}
+.oasis path{stroke:currentColor;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  filter:drop-shadow(0 0 5px rgba(52,201,160,.55))}
+
+/* ---------- Motes / pollen lumineux ---------- */
+.cine-motes{position:absolute;inset:0;opacity:0;pointer-events:none;will-change:opacity}
+.cine-motes i{
+  position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;
+  background:radial-gradient(circle,#eafff9,rgba(107,238,220,.2));
+  box-shadow:0 0 8px 2px rgba(107,238,220,.5);
+  animation:cine-rise var(--dur,14s) linear infinite;
+}
+@keyframes cine-rise{
+  0%{transform:translateY(0) translateX(0);opacity:0}
+  10%{opacity:.9}
+  90%{opacity:.7}
+  100%{transform:translateY(-92vh) translateX(var(--dx,20px));opacity:0}
+}
+
+/* ---------- Voiles cinématographiques ---------- */
+.cine-vignette{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(120% 90% at 50% 46%, transparent 52%, rgba(0,0,0,.42) 100%)}
+.cine-grain{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* ---------- Textes (actes) ---------- */
+.cine-acts{position:absolute;inset:0;display:flex;align-items:center;z-index:5}
+.cine-acts .wrap{width:100%;max-width:1180px;margin-inline:auto;
+  padding-inline:clamp(20px,5vw,40px);position:relative}
+.cine-act{
+  position:absolute;top:50%;left:clamp(20px,5vw,40px);right:clamp(20px,5vw,40px);
+  transform:translateY(-50%);max-width:800px;opacity:0;
+}
+.cine-act.act-4{opacity:1} /* état statique par défaut = résolution */
+
+.cine-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:.72rem;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--turq-bright);margin-bottom:22px;
+}
+.cine-eyebrow::before{content:"";width:26px;height:1px;background:var(--turq-bright);opacity:.7}
+.cine-act h1,.cine-act h2{
+  font-family:'Bricolage Grotesque',system-ui,sans-serif;font-weight:800;
+  line-height:1.02;letter-spacing:-.03em;text-wrap:balance;
+  font-size:clamp(2.5rem,7vw,5.4rem);margin:0 0 22px;
+  color:#fff;
+}
+.cine-act .grad{
+  background:linear-gradient(100deg,var(--turq-bright),var(--amber-soft));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.cine-act p{
+  font-size:clamp(1.05rem,2vw,1.34rem);line-height:1.55;
+  color:rgba(255,255,255,.82);max-width:46ch;margin:0;
+}
+.cine-cta{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin-top:34px}
+.cine-btn{
+  display:inline-flex;align-items:center;gap:9px;height:50px;padding:0 24px;border-radius:12px;
+  font-weight:600;font-size:1rem;transition:transform .25s var(--ease,cubic-bezier(.22,1,.36,1)),box-shadow .25s,background .25s;
+}
+.cine-btn svg{width:20px;height:20px}
+.cine-btn-primary{background:var(--turq);color:#05201c;box-shadow:0 12px 34px -10px rgba(45,212,191,.7)}
+.cine-btn-primary:hover{transform:translateY(-2px);box-shadow:0 18px 40px -12px rgba(45,212,191,.85)}
+.cine-btn-ghost{border:1px solid rgba(255,255,255,.28);color:#fff}
+.cine-btn-ghost:hover{transform:translateY(-2px);border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.06)}
+
+/* ---------- Indice de scroll ---------- */
+.cine-hint{
+  position:absolute;left:50%;bottom:34px;transform:translateX(-50%);z-index:6;
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  font-family:'JetBrains Mono',ui-monospace,monospace;
+  font-size:.66rem;letter-spacing:.24em;text-transform:uppercase;
+  color:rgba(255,255,255,.6);pointer-events:none;
+}
+.cine-hint i{position:relative;width:22px;height:34px;border:1.5px solid rgba(255,255,255,.45);border-radius:12px}
+.cine-hint i::after{content:"";position:absolute;left:50%;top:7px;width:3px;height:6px;border-radius:2px;
+  background:var(--turq-bright);transform:translateX(-50%);animation:cine-wheel 1.8s ease-in-out infinite}
+@keyframes cine-wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(-50%,12px)}}
+
+/* ---------- Pastilles de progression des actes ---------- */
+.cine-progress{position:absolute;right:clamp(18px,3vw,34px);top:50%;transform:translateY(-50%);
+  z-index:6;display:flex;flex-direction:column;gap:12px;pointer-events:none}
+.cine-progress span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.22);
+  transition:background .35s,transform .35s,box-shadow .35s}
+.cine-progress span.on{background:var(--turq-bright);transform:scale(1.35);
+  box-shadow:0 0 12px 2px rgba(107,238,220,.6)}
+
+/* ---------- Header lisible pendant la scène ---------- */
+body.cine-active .header::before{
+  content:"";position:absolute;inset:0;pointer-events:none;z-index:-1;
+  background:linear-gradient(180deg,rgba(3,5,9,.55),transparent);
+}
+body.cine-active .header .brand,
+body.cine-active .header .nav-links a,
+body.cine-active .header .nav-item>a{color:#fff !important}
+body.cine-active .header .brand-logo{fill:#fff !important}
+body.cine-active .header .icon-btn{color:rgba(255,255,255,.85);border-color:rgba(255,255,255,.2)}
+body.cine-active .header.scrolled{background:rgba(5,7,12,.5)}
+
+/* ---------- Réglages responsive ---------- */
+@media (max-width:720px){
+  .cine-progress{display:none}
+  .cine-act p{max-width:100%}
+  .cine-sun{width:min(34vh,240px)}
+}
+
+/* ---------- Repli mouvement réduit : scène lumineuse figée ---------- */
+@media (prefers-reduced-motion:reduce){
+  .cine-stars i,.pool-shimmer,.cine-motes i,.cine-hint i::after{animation:none}
+  .cine-hint{display:none}
+}

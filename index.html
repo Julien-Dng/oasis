@@ -11,10 +11,10 @@
 <meta property="og:type" content="website">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/styles.css">
+<link rel="stylesheet" href="assets/oasis-cinematic.css">
 <script>document.documentElement.classList.add('js');</script>
 <style>
-/* GSAP: masque le hero avant son entrée + neutralise la transition CSS des reveals (GSAP prend le relais) */
-.gsap .hero .hero-badge,.gsap .hero h1,.gsap .hero .hero-sub,.gsap .hero .hero-cta,.gsap .hero .marquee{opacity:0}
+/* GSAP : neutralise la transition CSS des reveals (GSAP prend le relais) */
 .gsap .reveal{transition:none}
 </style>
 <script>
@@ -103,19 +103,91 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   <a class="btn btn-primary" href="/contact">Démarrer un projet</a>
 </nav>
 <main id="main"><span id="top"></span>
-<section class="hero"><div class="wrap">
-  <span class="hero-badge"><span class="dot"></span>Agence web · disponible pour de nouveaux projets</span>
-  <h1 class="display">Votre présence digitale,<br><span class="grad">enfin vivante.</span></h1>
-  <p class="hero-sub">Oasis conçoit des sites, du référencement, du contenu social et des automatisations qui font grandir les marques.</p>
-  <div class="hero-cta">
-    <a class="btn btn-primary" href="/contact">Parlons de votre projet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
-    <a class="btn btn-ghost" href="/realisations">Voir nos réalisations</a>
+<section class="cine" id="cine" aria-label="Du désert digital à l'oasis de croissance">
+  <div class="cine-stage">
+    <!-- Ciel : nuit → aube → jour (fondus enchaînés) -->
+    <div class="cine-sky sky-night" aria-hidden="true"></div>
+    <div class="cine-sky sky-dawn" aria-hidden="true"></div>
+    <div class="cine-sky sky-day" aria-hidden="true"></div>
+
+    <!-- Étoiles + halo + soleil -->
+    <div class="cine-stars" id="cineStars" aria-hidden="true"></div>
+    <div class="cine-halo" aria-hidden="true"></div>
+    <div class="cine-sun" aria-hidden="true"><span class="cine-sun-disc"></span><span class="cine-sun-warm"></span></div>
+
+    <!-- Scène : dunes, source d'eau, oasis -->
+    <div class="cine-scene" aria-hidden="true">
+      <div class="scene-layer dune-far"><svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice"><path fill="currentColor" d="M0,600 C240,540 480,562 720,545 C960,528 1200,565 1440,545 L1440,900 L0,900 Z"/></svg></div>
+      <div class="scene-layer dune-mid"><svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice"><path fill="currentColor" d="M0,660 C260,700 460,760 720,772 C980,760 1180,700 1440,660 L1440,900 L0,900 Z"/></svg></div>
+
+      <div class="scene-layer water"><svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+        <defs>
+          <linearGradient id="cineWaterGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#8ff6e7"/><stop offset=".5" stop-color="#2dd4bf"/><stop offset="1" stop-color="#0b6b60"/>
+          </linearGradient>
+        </defs>
+        <g class="pool-group">
+          <ellipse class="pool-still" cx="720" cy="764" rx="308" ry="26"/>
+          <path class="pool-shimmer" d="M566,760 q56,-8 112,0 q56,8 112,0 q56,-8 112,0"/>
+          <path class="pool-shimmer" d="M606,770 q50,6 100,0 q50,-6 100,0" style="animation-delay:1.4s"/>
+        </g>
+      </svg></div>
+
+      <div class="scene-layer oasis"><svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice">
+        <!-- roseaux -->
+        <g class="reeds"><path stroke-width="3" d="M494,772 C492,742 488,716 484,694"/><path stroke-width="3" d="M508,772 C510,744 512,720 514,700"/><path stroke-width="3" d="M478,772 C474,748 470,730 466,714"/></g>
+        <g class="reeds"><path stroke-width="3" d="M956,770 C958,742 960,718 962,698"/><path stroke-width="3" d="M942,770 C938,744 934,722 932,704"/><path stroke-width="3" d="M970,770 C974,746 978,728 982,712"/></g>
+        <!-- palmier gauche -->
+        <g class="palm"><path stroke-width="7" d="M665,762 C660,700 650,600 632,520"/><path stroke-width="4" d="M632,516 C600,470 560,458 520,470"/><path stroke-width="4" d="M632,516 C628,466 622,438 616,414"/><path stroke-width="4" d="M632,516 C668,472 706,462 742,476"/><path stroke-width="4" d="M632,520 C596,516 566,528 542,552"/><path stroke-width="4" d="M632,520 C672,520 706,534 730,560"/></g>
+        <!-- petit palmier central -->
+        <g class="palm"><path stroke-width="5" d="M722,770 C720,720 718,600 716,566"/><path stroke-width="3.5" d="M716,566 C690,536 660,528 636,540"/><path stroke-width="3.5" d="M716,566 C716,532 714,510 712,492"/><path stroke-width="3.5" d="M716,566 C746,536 778,530 800,544"/></g>
+        <!-- palmier droit -->
+        <g class="palm"><path stroke-width="7" d="M790,766 C796,700 806,590 812,492"/><path stroke-width="4" d="M812,488 C778,446 738,436 700,452"/><path stroke-width="4" d="M812,488 C812,440 810,410 806,384"/><path stroke-width="4" d="M812,488 C848,446 890,440 926,458"/><path stroke-width="4" d="M812,492 C776,492 744,506 720,532"/><path stroke-width="4" d="M812,492 C852,494 888,510 912,538"/></g>
+      </svg></div>
+
+      <div class="scene-layer dune-near"><svg viewBox="0 0 1440 900" preserveAspectRatio="xMidYMax slice"><path fill="currentColor" d="M0,820 C300,792 520,842 720,846 C920,842 1140,792 1440,820 L1440,900 L0,900 Z"/></svg></div>
+    </div>
+
+    <!-- Motes lumineuses + voiles cinématographiques -->
+    <div class="cine-motes" id="cineMotes" aria-hidden="true"></div>
+    <div class="cine-vignette" aria-hidden="true"></div>
+    <div class="cine-grain" aria-hidden="true"></div>
+
+    <!-- Textes (4 actes) -->
+    <div class="cine-acts">
+      <div class="wrap">
+        <article class="cine-act act-1">
+          <span class="cine-eyebrow">01 — Le désert digital</span>
+          <h1>Perdu dans le<br><span class="grad">désert du digital.</span></h1>
+          <p>Des milliers de marques errent sans direction dans l'immensité numérique. Invisibles. Sans lumière. Sans croissance.</p>
+        </article>
+        <article class="cine-act act-2">
+          <span class="cine-eyebrow">02 — Une direction apparaît</span>
+          <h1>Une lueur turquoise<br><span class="grad">à l'horizon.</span></h1>
+          <p>Une stratégie claire perce l'obscurité. Le premier signe qu'une autre trajectoire est possible pour votre marque.</p>
+        </article>
+        <article class="cine-act act-3">
+          <span class="cine-eyebrow">03 — La source</span>
+          <h1>Nous révélons votre<br><span class="grad">source de croissance.</span></h1>
+          <p>Site, référencement, contenu social et automatisation : quatre courants qui alimentent une même source, durable.</p>
+        </article>
+        <article class="cine-act act-4">
+          <span class="cine-eyebrow">04 — L'oasis</span>
+          <h1>Du désert digital à<br><span class="grad">l'oasis de croissance.</span></h1>
+          <p>Oasis Web Agency transforme votre présence en un écosystème digital vivant, visible et rentable.</p>
+          <div class="cine-cta">
+            <a class="cine-btn cine-btn-primary" href="/contact">Parlons de votre projet <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+            <a class="cine-btn cine-btn-ghost" href="/realisations">Voir nos réalisations</a>
+          </div>
+        </article>
+      </div>
+    </div>
+
+    <!-- Indice de scroll + progression -->
+    <div class="cine-hint" aria-hidden="true"><span>Défilez pour révéler l'oasis</span><i></i></div>
+    <div class="cine-progress" aria-hidden="true"><span class="on"></span><span></span><span></span><span></span></div>
   </div>
-  <!-- <div class="hero-meta"><span class="lbl">Ils nous font confiance</span></div>
-  <div  class="marquee" aria-hidden="true"><div class="marquee-track">
-    <span>Smile&amp;Pay</span><span>Vallourec</span><span>Acupuncture Sanbao</span><span>N'oublie jamais</span><span>Maison San Tea</span><span>ATLHES</span><span>Smile&amp;Pay</span><span>Vallourec</span><span>Acupuncture Sanbao</span><span>N'oublie jamais</span><span>Maison San Tea</span><span>ATLHES</span>
-  </div></div> -->
-</div></section>
+</section>
 
 <section class="section" id="services"><div class="wrap">
   <div class="section-head reveal"><span class="eyebrow">Ce que nous faisons</span>
@@ -259,6 +331,7 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
 <script src="assets/gsap.min.js"></script>
 <script src="assets/ScrollTrigger.min.js"></script>
 <script src="assets/home-gsap.js"></script>
+<script src="assets/oasis-cinematic.js"></script>
 <!-- Cloudflare Web Analytics -->
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a6297bf650804a3fa35f35b487082912"}'></script>
 <!-- End Cloudflare Web Analytics -->
