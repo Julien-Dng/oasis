@@ -138,8 +138,8 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
   <p>Le site et les emails sont hébergés par <strong>OVH</strong>, en France (Union européenne). Vos données ne font l'objet d'aucun transfert hors de l'UE.</p>
   <h2>Durée de conservation</h2>
   <p>Les données issues du formulaire sont conservées <strong>3 ans</strong> à compter du dernier contact, puis supprimées.</p>
-  <h2>Cookies</h2>
-  <p>Ce site n'utilise <strong>aucun cookie de suivi ni traceur publicitaire</strong>. Seuls des éléments techniques strictement nécessaires au fonctionnement du site peuvent être utilisés.</p>
+  <h2>Cookies et mesure d'audience</h2>
+  <p>Ce site n'utilise <strong>aucun cookie de suivi ni traceur publicitaire</strong>. Pour mesurer la fréquentation, nous utilisons <strong>Cloudflare Web Analytics</strong>, un outil de statistiques <strong>sans cookie</strong> et respectueux de la vie privée&nbsp;: il ne dépose aucun cookie, ne crée pas d'empreinte de navigateur et ne collecte aucune donnée personnelle identifiable. Seuls des éléments techniques strictement nécessaires au fonctionnement du site peuvent être utilisés.</p>
   <h2>Vos droits</h2>
   <p>Conformément au Règlement général sur la protection des données (RGPD) et à la loi Informatique et Libertés, vous disposez des droits suivants&nbsp;: accès, rectification, effacement, limitation, opposition et portabilité de vos données.</p>
   <p>Pour exercer ces droits, écrivez-nous à <a href="mailto:contact@oasiswebagency.com">contact@oasiswebagency.com</a>. Vous pouvez également introduire une réclamation auprès de la <a href="https://www.cnil.fr" target="_blank" rel="noopener">CNIL</a>.</p>
@@ -205,5 +205,8 @@ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
 <script src="assets/gsap.min.js"></script>
 <script src="assets/ScrollTrigger.min.js"></script>
 <script src="assets/site-gsap.js"></script>
+<!-- Cloudflare Web Analytics -->
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "a6297bf650804a3fa35f35b487082912"}'></script>
+<!-- End Cloudflare Web Analytics -->
 </body>
 </html>
