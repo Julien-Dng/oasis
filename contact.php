@@ -5,13 +5,28 @@
  *
  * - Répond en JSON aux envois AJAX (fetch depuis contact.html)
  * - Repli HTML pour les navigateurs sans JavaScript
- * - Validation + honeypot anti-spam + limites de taille
+ * - Validation + limites de taille
+ * - Anti-spam : honeypot, jeton JavaScript + délai minimum de saisie,
+ *   limitation par IP, filtres de contenu (liens, alphabets, mots-clés)
  */
 
 // ------- Configuration -------
 $TO      = 'contact@oasiswebagency.com';   // destinataire des messages
 $FROM    = 'contact@oasiswebagency.com';   // doit être une adresse de VOTRE domaine (OVH)
 $SUBJECT = 'Nouveau message depuis oasiswebagency.com';
+
+// Anti-spam
+$MIN_SECONDS   = 4;       // délai minimum entre l'affichage du formulaire et l'envoi
+$MAX_SECONDS   = 86400;   // un formulaire ouvert depuis plus de 24h est refusé
+$RATE_SHORT    = 3;       // envois max par IP sur 10 minutes
+$RATE_DAY      = 8;       // envois max par IP sur 24 heures
+$MAX_LINKS     = 2;       // nombre de liens max dans le message
+$SPAM_WORDS    = array(   // mots-clés typiques du spam (insensible à la casse)
+    'viagra', 'cialis', 'casino', 'porn', 'xxx', 'escort', 'sex dating', 'bitcoin',
+    'forex', 'binary option', 'payday loan', 'guest post', 'rank your website',
+    'first page of google', 'whatsapp me', 'unsubscribe',
+);
+$RATE_DIR      = __DIR__ . '/.antispam'; // stockage des compteurs (protégé par .htaccess)
 
 // ------- Utilitaires -------
 function is_ajax() {
@@ -52,6 +67,52 @@ if (!empty($_POST['website'])) {
     respond(true);
 }
 
+// ------- Jeton JavaScript + délai de saisie -------
+// Le champ "t" est rempli par assets/app.js au chargement de la page :
+// les robots qui postent directement sur contact.php ne l'ont pas.
+$t = isset($_POST['t']) ? (int) $_POST['t'] : 0;
+if ($t <= 0) {
+    respond(false, 'Merci d\'activer JavaScript pour envoyer le formulaire.');
+}
+$elapsed = time() - (int) floor($t / 1000);
+if ($elapsed < $MIN_SECONDS || $elapsed > $MAX_SECONDS) {
+    respond(true); // envoi trop rapide (robot) ou jeton périmé : on ignore en silence
+}
+
+// ------- Limitation par IP -------
+function rate_limited($dir, $short, $day) {
+    $ip = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : 'inconnu';
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true)) return false; // pas de stockage : on n'empêche pas l'envoi
+    if (!file_exists($dir . '/.htaccess')) {
+        @file_put_contents($dir . '/.htaccess', "Require all denied\nDeny from all\n");
+    }
+    $file = $dir . '/' . hash('sha256', $ip) . '.json';
+    $now  = time();
+    $fp   = @fopen($file, 'c+');
+    if (!$fp) return false;
+    flock($fp, LOCK_EX);
+    $hits = json_decode(stream_get_contents($fp), true);
+    $hits = is_array($hits) ? array_filter($hits, function ($ts) use ($now) { return $ts > $now - 86400; }) : array();
+    $recent = count(array_filter($hits, function ($ts) use ($now) { return $ts > $now - 600; }));
+    $blocked = $recent >= $short || count($hits) >= $day;
+    if (!$blocked) $hits[] = $now;
+    ftruncate($fp, 0);
+    rewind($fp);
+    fwrite($fp, json_encode(array_values($hits)));
+    flock($fp, LOCK_UN);
+    fclose($fp);
+    // Nettoyage occasionnel des fichiers anciens
+    if (mt_rand(1, 50) === 1) {
+        foreach ((array) glob($dir . '/*.json') as $f) {
+            if (@filemtime($f) < $now - 86400) @unlink($f);
+        }
+    }
+    return $blocked;
+}
+if (rate_limited($RATE_DIR, $RATE_SHORT, $RATE_DAY)) {
+    respond(false, 'Trop de messages envoyés depuis votre connexion. Merci de réessayer plus tard.');
+}
+
 // ------- Récupération & nettoyage -------
 function clean($k, $max = 5000) {
     $v = isset($_POST[$k]) ? trim($_POST[$k]) : '';
@@ -70,6 +131,30 @@ if ($nom === '' || $email === '' || trim($message) === '') {
 }
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     respond(false, "L'adresse email n'est pas valide.");
+}
+if (mb_strlen(trim($message)) < 10) {
+    respond(false, 'Votre message est un peu court : décrivez-nous votre projet en quelques mots.');
+}
+
+// ------- Filtres de contenu anti-spam (rejet silencieux) -------
+function looks_like_spam($nom, $entreprise, $message, $max_links, $words) {
+    $link = '~(https?://|www\.|\[url|<a\s)~i';
+    // Pas de lien dans le nom ou l'entreprise
+    if (preg_match($link, $nom) || preg_match($link, $entreprise)) return true;
+    // Trop de liens dans le message, ou balises BBCode / HTML de lien
+    if (preg_match_all('~(https?://|www\.)~i', $message) > $max_links) return true;
+    if (preg_match('~\[url|\[link|<a\s+href~i', $message)) return true;
+    // Alphabets jamais utilisés par nos clients (cyrillique, chinois/japonais, coréen)
+    if (preg_match('/[\p{Cyrillic}\p{Han}\p{Hiragana}\p{Katakana}\p{Hangul}]/u', $nom . $entreprise . $message)) return true;
+    // Mots-clés de spam
+    $haystack = mb_strtolower($nom . ' ' . $entreprise . ' ' . $message);
+    foreach ($words as $w) {
+        if (strpos($haystack, $w) !== false) return true;
+    }
+    return false;
+}
+if (looks_like_spam($nom, $entreprise, $message, $MAX_LINKS, $SPAM_WORDS)) {
+    respond(true); // on fait comme si tout allait bien pour ne pas renseigner le robot
 }
 
 // ------- Construction de l'email -------
