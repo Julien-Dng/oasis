@@ -61,6 +61,8 @@ document.querySelectorAll('.faq-q').forEach(function(q){
 (function(){
   var form=document.getElementById('contactForm');if(!form)return;
   var err=document.getElementById('formError');
+  /* anti-spam : horodatage du chargement, vérifié par contact.php */
+  var ts=form.querySelector('input[name=t]');if(ts)ts.value=Date.now();
   function showOk(){
     form.style.display='none';
     var ok=document.getElementById('formSuccess');ok.classList.add('show');
